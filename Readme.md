@@ -1,7 +1,7 @@
 # Личный проект «TaskForce»
 
 * Студент: [Светлана Перепелицына](https://up.htmlacademy.ru/yii/1/user/427817).
-* Наставник: `Неизвестно`.
+* Наставник: [Денис Байдаров](https://htmlacademy.ru/profile/4er).
 
 ---
 
