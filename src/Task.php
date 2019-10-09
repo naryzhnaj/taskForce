@@ -12,7 +12,7 @@ class Task
     public static $CUSTOMER = 'customer';
     public static $EXECUTOR = 'executor';
 
-    public static $ACTION_REFUZE = 'refuse';
+    public static $ACTION_REFUSE = 'refuse';
     public static $ACTION_RESPOND = 'respond';
     public static $ACTION_WRITE = 'write';
 
@@ -32,17 +32,40 @@ class Task
         $this->status = self::$STATUS_NEW;
     }
 
-    public function getOperationList($role)
+    private function getOperations($role)
     {
+        switch ($this->status) {
+            case self::$STATUS_NEW:
+                switch ($role) {
+                    case self::$CUSTOMER:
+                        return [self::$ACTION_WRITE => self::$STATUS_NEW,
+                                self::$ACTION_RESPOND => self::$STATUS_PROGRESS, ];
+
+                    case self::$EXECUTOR:
+                        return [self::$ACTION_REFUSE => self::$STATUS_CANCEL];
+                } break;
+
+                case self::$STATUS_PROGRESS:
+                    return ($role === self::$CUSTOMER) ? [self::$ACTION_REFUSE => self::$STATUS_NEW] : [];
+
+            case self::$STATUS_CANCEL: return [];
+
+            case self::$STATUS_COMPLETE: return [];
+        }
     }
 
-    public function getStatus()
+    public function getActionList($role)
     {
-        return $this->status;
+        return array_keys($this->getOperations($role)) ?? [];
     }
 
-    public function getStatusNext($role, $action)
+    public function getStatusNext($role, $act)
     {
+        $actions = $this->getOperations($role);
+        if (isset($actions) && $act && isset($actions[$act])) {
+            $this->status = $actions[$act];
+        }
+
         return $this->status;
     }
 }
