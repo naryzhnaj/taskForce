@@ -4,64 +4,80 @@ namespace TaskForse;
 
 class Task
 {
-    public static $STATUS_NEW = 'new';
-    public static $STATUS_PROGRESS = 'in_progress';
-    public static $STATUS_CANCEL = 'cancel';
-    public static $STATUS_COMPLETE = 'complete';
+    public const STATUS_NEW = 'new';
+    public const STATUS_PROGRESS = 'in_progress';
+    public const STATUS_CANCEL = 'cancel';
+    public const STATUS_COMPLETE = 'complete';
+    public const STATUS_FAIL = 'fail';
 
-    public static $CUSTOMER = 'customer';
-    public static $EXECUTOR = 'executor';
+    public const CUSTOMER = 'customer';
+    public const EXECUTOR = 'executor';
 
-    public static $ACTION_REFUSE = 'refuse';
-    public static $ACTION_RESPOND = 'respond';
-    public static $ACTION_WRITE = 'write';
+    public const ACTION_ADMIT = 'admit';
+    public const ACTION_REFUSE = 'refuse';
+    public const ACTION_RESPOND = 'respond';
+    public const ACTION_WRITE = 'write';
 
-    private $customer = null;
-    private $executor = null;
-    private $status = null;
+    private $title = null;
+    private $customer_id = null;
+    private $city_id = null;
+    private $category_id = null;
+    private $location = null;
     private $deadline = null;
+    private $budget = null;
+    private $details = null;
+    private $file = null;
 
-    public function __construct($executor, $deadline)
+    private $estimate = null;
+    private $status = null;
+    private $executor_id = null;
+
+    public function __construct($data)
     {
-        if ($executor && $deadline && strtotime($deadline)) {
-            $this->executor = $executor;
-            $this->deadline = strtotime($deadline);
-        } else {
-            throw new Exception('ошибка в параметрах');
-        }
-        $this->status = self::$STATUS_NEW;
+        $this->title = $data;
+        $this->status = self::STATUS_NEW;
     }
 
-    private function getOperations($role)
+    private function getRole($id)
     {
-        switch ($this->status) {
-            case self::$STATUS_NEW:
-                switch ($role) {
-                    case self::$CUSTOMER:
-                        return [self::$ACTION_WRITE => self::$STATUS_NEW,
-                                self::$ACTION_RESPOND => self::$STATUS_PROGRESS, ];
+        return ($id) ? self::EXECUTOR : self::CUSTOMER;
+    }
 
-                    case self::$EXECUTOR:
-                        return [self::$ACTION_REFUSE => self::$STATUS_CANCEL];
+    private function getOperations($id)
+    {
+        $role = $this->getRole($id);
+        $res = [];
+
+        switch ($this->status) {
+            case self::STATUS_PROGRESS:
+                if ($role === self::EXECUTOR) {
+                    $res = [self::ACTION_REFUSE => self::STATUS_FAIL];
                 } break;
 
-                case self::$STATUS_PROGRESS:
-                    return ($role === self::$CUSTOMER) ? [self::$ACTION_REFUSE => self::$STATUS_NEW] : [];
+            case self::STATUS_NEW:
+                switch ($role) {
+                    case self::EXECUTOR:
+                        $res = [self::ACTION_WRITE => [],
+                                self::ACTION_RESPOND => [], ]; break;
 
-            case self::$STATUS_CANCEL: return [];
-
-            case self::$STATUS_COMPLETE: return [];
+                    case self::CUSTOMER:
+                        $res = [self::ACTION_WRITE => [],
+                                self::ACTION_ADMIT => self::STATUS_PROGRESS,
+                                self::ACTION_REFUSE => self::STATUS_CANCEL, ];
+                }
         }
+
+        return $res;
     }
 
-    public function getActionList($role)
+    public function getActionList($id)
     {
-        return array_keys($this->getOperations($role)) ?? [];
+        return array_keys($this->getOperations($id)) ?? [];
     }
 
-    public function getStatusNext($role, $act)
+    public function getStatusNext($id, $act)
     {
-        $actions = $this->getOperations($role);
+        $actions = $this->getOperations($id);
         if (isset($actions) && $act && isset($actions[$act])) {
             $this->status = $actions[$act];
         }
