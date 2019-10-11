@@ -32,15 +32,16 @@ class Task
     private $status = null;
     private $executor_id = null;
 
-    public function __construct($data)
+    public function __construct($data, $customer_id)
     {
         $this->title = $data;
+        $this->customer_id = $customer_id;
         $this->status = self::STATUS_NEW;
     }
 
     private function getRole($id)
     {
-        return ($id) ? self::EXECUTOR : self::CUSTOMER;
+        return ($id === $this->customer_id) ? self::CUSTOMER : self::EXECUTOR;
     }
 
     private function getOperations($id)
@@ -57,11 +58,11 @@ class Task
             case self::STATUS_NEW:
                 switch ($role) {
                     case self::EXECUTOR:
-                        $res = [self::ACTION_WRITE => [],
-                                self::ACTION_RESPOND => [], ]; break;
+                        $res = [self::ACTION_WRITE => null,
+                                self::ACTION_RESPOND => null, ]; break;
 
                     case self::CUSTOMER:
-                        $res = [self::ACTION_WRITE => [],
+                        $res = [self::ACTION_WRITE => null,
                                 self::ACTION_ADMIT => self::STATUS_PROGRESS,
                                 self::ACTION_REFUSE => self::STATUS_CANCEL, ];
                 }
@@ -77,8 +78,11 @@ class Task
 
     public function getStatusNext($id, $act)
     {
+        if (!$act) {
+            throw new Exception('Нужно указать действие');
+        }
         $actions = $this->getOperations($id);
-        if (isset($actions) && $act && isset($actions[$act])) {
+        if (isset($actions) && isset($actions[$act])) {
             $this->status = $actions[$act];
         }
 
