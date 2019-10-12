@@ -1,6 +1,6 @@
 <?php
 
-namespace TaskForse;
+namespace TaskForse\Models;
 
 class Task
 {
