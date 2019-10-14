@@ -1,6 +1,6 @@
 <?php
 
-use TaskForse\Task;
+use TaskForse\Models\Task;
 
 require_once 'vendor/autoload.php';
 $id_customer = 0;
