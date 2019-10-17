@@ -15,14 +15,14 @@ assert($task->getStatusNext($id_executor, Task::ACTION_WRITE) == Task::STATUS_NE
 
 // отклик принят
 assert($task->getStatusNext($id_customer, Task::ACTION_ADMIT) == Task::STATUS_PROGRESS, 'progress test');
-assert(implode(', ', $task->getActionList($id_customer)) == '');
 assert(implode(', ', $task->getActionList($id_executor)) == 'refuse');
+assert(implode(', ', $task->getActionList($id_customer)) == 'complete');
 
 // исполнитель взялся, заказчик не вправе отменять
 assert($task->getStatusNext($id_customer, Task::ACTION_REFUSE) == Task::STATUS_PROGRESS, 'cancel test');
 
-// исполнитель отказался
-assert($task->getStatusNext($id_executor, Task::ACTION_REFUSE) == Task::STATUS_FAIL, 'fail test');
+// задание выполнено
+assert($task->getStatusNext($id_customer, Task::ACTION_COMPLETE) == Task::STATUS_COMPLETED, 'complete test');
 
 // заказчик отменил пустую задачу
 $task2 = new Task('test task', $id_customer);
