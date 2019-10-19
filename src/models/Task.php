@@ -7,7 +7,7 @@ class Task
     public const STATUS_NEW = 'new';
     public const STATUS_PROGRESS = 'in_progress';
     public const STATUS_CANCEL = 'cancel';
-    public const STATUS_COMPLETE = 'complete';
+    public const STATUS_COMPLETED = 'completed';
     public const STATUS_FAIL = 'fail';
 
     public const CUSTOMER = 'customer';
@@ -17,18 +17,19 @@ class Task
     public const ACTION_REFUSE = 'refuse';
     public const ACTION_RESPOND = 'respond';
     public const ACTION_WRITE = 'write';
+    public const ACTION_COMPLETE = 'complete';
 
     private $title = null;
     private $customer_id = null;
     private $city_id = null;
     private $category_id = null;
     private $location = null;
+    private $post_time = null;
     private $deadline = null;
     private $budget = null;
     private $details = null;
     private $file = null;
 
-    private $estimate = null;
     private $status = null;
     private $executor_id = null;
 
@@ -51,8 +52,11 @@ class Task
 
         switch ($this->status) {
             case self::STATUS_PROGRESS:
-                if ($role === self::EXECUTOR) {
-                    $res = [self::ACTION_REFUSE => self::STATUS_FAIL];
+                switch ($role) {
+                    case self::EXECUTOR:
+                        $res = [self::ACTION_REFUSE => self::STATUS_FAIL]; break;
+                    case self::CUSTOMER:
+                        $res = [self::ACTION_COMPLETE => self::STATUS_COMPLETED];
                 } break;
 
             case self::STATUS_NEW:
