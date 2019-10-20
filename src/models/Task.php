@@ -12,12 +12,7 @@ class Task
 
     public const CUSTOMER = 'customer';
     public const EXECUTOR = 'executor';
-
-    public const ACTION_ADMIT = 'admit';
-    public const ACTION_REFUSE = 'refuse';
-    public const ACTION_RESPOND = 'respond';
-    public const ACTION_WRITE = 'write';
-    public const ACTION_COMPLETE = 'complete';
+    public const VISITOR = 'visitor';
 
     private $title = null;
     private $customer_id = null;
@@ -33,6 +28,12 @@ class Task
     private $status = null;
     private $executor_id = null;
 
+    /**
+     * Task constructor
+     *
+     * @param string $data название задачи
+     * @param int $customer_id id заказчика
+     */
     public function __construct($data, $customer_id)
     {
         $this->title = $data;
@@ -40,11 +41,31 @@ class Task
         $this->status = self::STATUS_NEW;
     }
 
+    /**
+     * определение роли активного пользователя по id
+     *
+     * @param int $id id пользователя
+     *
+     * @return string $role роль
+     */
     private function getRole($id)
     {
-        return ($id === $this->customer_id) ? self::CUSTOMER : self::EXECUTOR;
+        $role = self::VISITOR;
+        if ($id === $this->customer_id) {
+            $role = self::CUSTOMER;
+        } elseif ($id === $this->executor_id) {
+            $role = self::EXECUTOR;
+        }
+        return $role;
     }
 
+    /**
+     * определение карты переходов статуса задачи в зависимости от роли, текущего статуса и действий
+     *
+     * @param int $id id активного пользователя
+     *
+     * @return array $res доступные действия и соответсвующие им переходы состояния
+     */
     private function getOperations($id)
     {
         $role = $this->getRole($id);
@@ -54,40 +75,60 @@ class Task
             case self::STATUS_PROGRESS:
                 switch ($role) {
                     case self::EXECUTOR:
-                        $res = [self::ACTION_REFUSE => self::STATUS_FAIL]; break;
+                        $res = [Refuse::class => self::STATUS_FAIL,
+                                Write::class => null, ]; break;
                     case self::CUSTOMER:
-                        $res = [self::ACTION_COMPLETE => self::STATUS_COMPLETED];
+                        $res = [Complete::class => self::STATUS_COMPLETED,
+                                Write::class => null, ];
                 } break;
 
             case self::STATUS_NEW:
                 switch ($role) {
-                    case self::EXECUTOR:
-                        $res = [self::ACTION_WRITE => null,
-                                self::ACTION_RESPOND => null, ]; break;
+                    case self::VISITOR:
+                        $res = [Respond::class => null]; break;
 
                     case self::CUSTOMER:
-                        $res = [self::ACTION_WRITE => null,
-                                self::ACTION_ADMIT => self::STATUS_PROGRESS,
-                                self::ACTION_REFUSE => self::STATUS_CANCEL, ];
+                        $res = [Admit::class => self::STATUS_PROGRESS,
+                                Refuse::class => self::STATUS_CANCEL, ];
                 }
         }
 
         return $res;
     }
 
+    /**
+     * определение списка доступных пользователю действий
+     *
+     * @param int $id id активного пользователя
+     *
+     * @return array
+     */
     public function getActionList($id)
     {
         return array_keys($this->getOperations($id)) ?? [];
     }
 
+    /**
+     * определение следующего статуса задачи
+     *
+     * @param int $id id пользователя
+     * @param string $act действие
+     *
+     * @return string статус
+     */
     public function getStatusNext($id, $act)
     {
         if (!$act) {
             throw new Exception('Нужно указать действие');
         }
         $actions = $this->getOperations($id);
+
         if (isset($actions) && isset($actions[$act])) {
             $this->status = $actions[$act];
+            // назначаем случайного исполнителя
+            if ($act === Admit::class) {
+                $this->executor_id = 1;
+            }
         }
 
         return $this->status;
