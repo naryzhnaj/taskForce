@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
@@ -38,5 +38,7 @@ try {
     $task2 = new Task('test task', $id_customer);
     assert($task2->getStatusNext($id_customer, Refuse::class) == Task::STATUS_CANCEL, 'cancel test');
 } catch (FileFormatException $e) {
+    echo 'Ошибка: '.$e->getMessage();
+} catch (Error $e) {
     echo 'Ошибка: '.$e->getMessage();
 }
