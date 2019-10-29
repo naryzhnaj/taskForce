@@ -2,7 +2,7 @@
 
 namespace TaskForse\Models;
 
-class Сomplete extends AbstractAction
+class Complete extends AbstractAction
 {
     public static function getName()
     {
