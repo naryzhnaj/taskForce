@@ -27,8 +27,8 @@ try {
 
     $file = new ParseCsv('data\opinions.csv');
     $file->csvToSQL('reviews');
-} catch (RuntimeException $e) {
-    echo 'Ошибка: '.$e->getFile().$e->getLine();
+} catch (Exception $e) {
+    echo 'Ошибка: '.$e->getMessage();
 } catch (Error $e) {
     echo 'Ошибка: '.$e->getMessage();
 }
