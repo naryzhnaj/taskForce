@@ -3,19 +3,32 @@ declare(strict_types=1);
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
-use TaskForse\CsvToSQL;
+use TaskForse\ParseCsv;
 require_once 'vendor/autoload.php';
 
 try {
-    CsvToSQL::parseCsv('data\categories.csv', 'categories');
-    CsvToSQL::parseCsv('data\cities.csv', 'cities');
-    CsvToSQL::parseCsv('data\users.csv', 'users');
-    CsvToSQL::parseCsv('data\profiles.csv', 'accounts');
-    CsvToSQL::parseCsv('data\tasks.csv', 'tasks');
-    CsvToSQL::parseCsv('data\replies.csv', 'responds');
-    CsvToSQL::parseCsv('data\opinions.csv', 'reviews');
+    $file = new ParseCsv('data\categories.csv');
+    $file->csvToSQL('categories');
+
+    $file = new ParseCsv('data\cities.csv');
+    $file->csvToSQL('cities');
+
+    $file = new ParseCsv('data\users.csv');
+    $file->csvToSQL('users');
+
+    $file = new ParseCsv('data\tasks.csv');
+    $file->csvToSQL('tasks');
+
+    $file = new ParseCsv('data\profiles.csv');
+    $file->csvToSQL('accounts');
+
+    $file = new ParseCsv('data\replies.csv');
+    $file->csvToSQL('responds');
+
+    $file = new ParseCsv('data\opinions.csv');
+    $file->csvToSQL('reviews');
 } catch (RuntimeException $e) {
-    echo 'Ошибка: '.$e->getMessage();
+    echo 'Ошибка: '.$e->getFile().$e->getLine();
 } catch (Error $e) {
     echo 'Ошибка: '.$e->getMessage();
 }
