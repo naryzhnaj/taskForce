@@ -44,17 +44,29 @@ class ParseCsv
      * перевод данных из CSV в SQL формат
      * в результате создается SQL файл с запросами.
      *
-     * @param string $table имя таблицы в БД
+     * @return string $file_name имя искомого файла
      */
-    public function csvToSQL(string $table): void
+    public function csvToSQL(): string
     {
-        $sql_file = new \SplFileObject("$table.sql", 'w');
+        // соответствующее имя таблицы в БД
+        $table = $this->fh->getBasename('.csv');
+        // соответствующее имя sql файла
+        $file_name = str_replace('.csv', '.sql', $this->fh->getPathname());
+        $sql_file = new \SplFileObject($file_name, 'w');
 
+        // записываем заголовок
         $columns = implode(', ', $this->fh->fgetcsv());
+        $sql_file->fwrite("INSERT INTO $table ($columns) VALUES \n");
+
+        // записываем первую строку с данными
+        $data = $this->fh->fgetcsv();
+        $sql_file->fwrite($this->parseValues($data));
 
         while ($data = $this->fh->fgetcsv()) {
-            $line = 'INSERT INTO ' . $table . ' (' . $columns . ') VALUES '. $this->parseValues($data) . ";\n";
-            $sql_file->fwrite($line);
+            $sql_file->fwrite(",\n".$this->parseValues($data));
         }
+        $sql_file->fwrite(';');
+
+        return $file_name;
     }
 }
