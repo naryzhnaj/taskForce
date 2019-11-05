@@ -1,43 +1,26 @@
 <?php
+
 declare(strict_types=1);
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
-use TaskForse\Models\Task;
-use TaskForse\Ex\FileFormatException;
-use TaskForse\Models\Admit;
-use TaskForse\Models\Complete;
-use TaskForse\Models\Respond;
-use TaskForse\Models\Refuse;
-use TaskForse\Models\Write;
+use TaskForse\ParseCsv;
 
 require_once 'vendor/autoload.php';
+$source = ['data\categories.csv',
+            'data\cities.csv',
+            'data\users.csv',
+            'data\tasks.csv',
+            'data\accounts.csv',
+            'data\responds.csv',
+            'data\reviews.csv', ];
+
 try {
-    $id_customer = 0;
-    $id_executor = 1;
-    $task = new Task('test task', $id_customer);
-
-    // новый заказ
-    assert(implode('', $task->getActionList($id_executor)) == Respond::class);
-    assert(implode('', $task->getActionList($id_customer)) == Admit::class . Refuse::class);
-    assert($task->getStatusNext($id_executor, Respond::class) == Task::STATUS_NEW, 'start test');
-
-    // отклик принят
-    assert($task->getStatusNext($id_customer, Admit::class) == Task::STATUS_PROGRESS, 'progress test');
-    assert($task->getStatusNext($id_executor, Write::class) == Task::STATUS_PROGRESS, 'write test');
-    assert(implode('', $task->getActionList($id_executor)) == Refuse::class . Write::class);
-    assert(implode('', $task->getActionList($id_customer)) == Complete::class . Write::class);
-
-    // исполнитель взялся, заказчик не вправе отменять
-    assert($task->getStatusNext($id_customer, Refuse::class) == Task::STATUS_PROGRESS, 'cancel test');
-
-    // задание выполнено
-    assert($task->getStatusNext($id_customer, Complete::class) == Task::STATUS_COMPLETED, 'complete test');
-
-    // заказчик отменил пустую задачу
-    $task2 = new Task('test task', $id_customer);
-    assert($task2->getStatusNext($id_customer, Refuse::class) == Task::STATUS_CANCEL, 'cancel test');
-} catch (FileFormatException $e) {
+    foreach ($source as $file) {
+        $fh = new ParseCsv($file);
+        echo 'успешно сформирован '.$fh->csvToSQL().'<br>';
+    }
+} catch (Exception $e) {
     echo 'Ошибка: '.$e->getMessage();
 } catch (Error $e) {
     echo 'Ошибка: '.$e->getMessage();
