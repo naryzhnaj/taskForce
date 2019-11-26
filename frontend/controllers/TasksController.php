@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use app\models\Tasks;
+use app\models\Categories;
+use app\models\TaskSearchForm;
 
 class TasksController extends \yii\web\Controller
 {
@@ -10,12 +12,11 @@ class TasksController extends \yii\web\Controller
 
     public function actionIndex()
     {
-        $allTasks = Tasks::find()
-            ->where(['status' => 'new'])
-            ->andWhere('end_date >= now()')
-            ->orderBy(['dt_add'=> SORT_DESC])
-            ->limit(self::CARDS_AMOUNT)->all();
+        $model = new TaskSearchForm();
+        $all_categories = Categories::find()->select(['title', 'id'])->column();
+        $query = Tasks::find()->where(['status' => 'new'])->andWhere('end_date >= now()');
+        $allTasks = $query->orderBy(['dt_add'=> SORT_DESC])->limit(self::CARDS_AMOUNT)->all();
 
-        return $this->render('index', ['allTasks' => $allTasks]);
+        return $this->render('index', ['allTasks' => $allTasks, 'all_categories' => $all_categories, 'model'=>$model]);
     }
 }
