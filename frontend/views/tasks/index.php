@@ -2,8 +2,12 @@
 /* @var $this yii\web\View */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+$checkboxTemplateCallback = function ($index, $label, $name, $checked, $value) {
+    return '<div class="form-group">'
+    .Html::checkbox($name, $checked, ['value' => $value, 'id' => $index, 'class' => 'visually-hidden checkbox__input'])
+    .Html::label($label, $index).'</div>';
+};
 
-$now = new DateTime();
 $this->title = 'Новые задания';
 ?>
 <div class="page-container">
@@ -24,7 +28,7 @@ $this->title = 'Новые задания';
                   <?php if (isset($task->address)):?>
                       <p class="new-task__place"><?=Html::encode($task->address); ?></p>
                   <?php endif;?>
-                  <span class="new-task__time"><?=$now->diff(new DateTime($task->dt_add))->format('%d дней %h часов назад'); ?></span>
+                  <span class="new-task__time"><?= Yii::$app->formatter->asRelativeTime($task->dt_add); ?></span>
               </div>
           <?php endforeach; ?>
       </div>
@@ -52,19 +56,19 @@ $this->title = 'Новые задания';
             ]]); ?>
               <fieldset class="search-task__categories">
                   <legend>Категории</legend>
-                  <?= $form->field($model, 'categories')
-                      ->checkboxList($all_categories, ['itemOptions' => ['class' => 'checkbox__input']])
-                      ->label(false); ?>
+                  <?= $form->field($model, 'categories')->checkboxList($all_categories, ['item' => $checkboxTemplateCallback])->label(false); ?>
               </fieldset>
               <fieldset class="search-task__categories">
                   <legend>Дополнительно</legend>
                   <?php
-                    echo $form->field($model, 'same_city')->checkbox(['class' => 'checkbox__input']);
-                    echo $form->field($model, 'is_distant')->checkbox(['class' => 'checkbox__input']);
+                    echo $form->field($model, 'same_city', ['template' => '{input}{label}{error}'])->
+                        input('checkbox', ['class' => 'visually-hidden checkbox__input', 'value' => 1]);
+                    echo $form->field($model, 'is_distant', ['template' => '{input}{label}{error}'])->
+                        input('checkbox', ['class' => 'visually-hidden checkbox__input', 'value' => 1]);
                   ?>
               </fieldset>
               <?php
-                echo $form->field($model, 'period')->dropDownList([
+                echo $form->field($model, 'period', ['template' => '{label}<br>{input}'])->dropDownList([
                       'month' => 'За месяц',
                       'week' => 'За неделю',
                       'day' => 'За день'],
