@@ -40,7 +40,9 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'enableStrictParsing' => false,
-            'rules' => [],
+            'rules' => [
+                '/task/view/<id:\d+>' => 'tasks/show'
+            ],
         ],
     ],
     'params' => $params,

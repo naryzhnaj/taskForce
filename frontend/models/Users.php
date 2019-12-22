@@ -68,11 +68,11 @@ class Users extends \yii\db\ActiveRecord
             'name' => 'Name',
             'email' => 'Email',
             'password' => 'Password',
-            'rating' => 'Rating',
-            'orders' => 'Orders',
-            'failures' => 'Failures',
-            'popularity' => 'Popularity',
-            'dt_add' => 'Dt Add',
+            'rating' => 'рейтинг',
+            'orders' => 'число заказов',
+            'failures' => 'число провалов',
+            'popularity' => 'популярность',
+            'dt_add' => 'дата регистрации',
         ];
     }
 
@@ -122,6 +122,14 @@ class Users extends \yii\db\ActiveRecord
     public function getResponds()
     {
         return $this->hasMany(Responds::className(), ['author_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getReviewsAmount()
+    {
+        return $this->hasMany(Reviews::className(), ['user_id' => 'id'])->count();
     }
 
     /**

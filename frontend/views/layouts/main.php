@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
@@ -29,7 +30,7 @@ AppAsset::register($this);
   <header class="page-header">
       <div class="main-container page-header__container">
           <div class="page-header__logo">
-              <a href="index.php">
+              <a href=<?=Url::home(); ?>>
                   <svg class="page-header__logo-image" id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1634 646.35">
                       <title>taskforce_logo2-01</title>
                       <g>
@@ -59,7 +60,7 @@ AppAsset::register($this);
           <div class="header__nav">
               <ul class="header-nav__list site-list">
                   <li class="site-list__item">
-                      <a href="tasks">Задания</a>
+                      <a href="<?=Url::toRoute('/tasks'); ?>">Задания</a>
                   </li>
                   <li class="site-list__item">
                       <a href="#">Исполнители</a>
@@ -67,7 +68,7 @@ AppAsset::register($this);
                   <li class="site-list__item">
                       <a href="#">Создать задание</a>
                   </li>
-                  <li class="site-list__item site-list__item--active">
+                  <li class="site-list__item">
                       <a>Мой профиль</a>
                   </li>
               </ul>
@@ -99,7 +100,7 @@ AppAsset::register($this);
           </div>
           <div class="header__account">
               <a class="header__account-photo">
-                  <img src="./img/user-photo.png"
+                  <img src="/img/user-photo.png"
                        width="43" height="44"
                        alt="Аватар пользователя">
               </a>
@@ -122,11 +123,11 @@ AppAsset::register($this);
           </div>
       </div>
   </header>
-  <div class="wrap">
-      <div class="container">
+  <main class="page-main">
+      <div class="main-container page-container">
         <?= $content ?>
       </div>
-  </div>
+  </main>
   <footer class="page-footer">
       <div class="main-container page-footer__container">
           <div class="page-footer__info">
@@ -164,7 +165,7 @@ AppAsset::register($this);
           <div class="page-footer__copyright">
               <a>
                   <img class="copyright-logo"
-                       src="./img/academy-logo.png"
+                       src="/img/academy-logo.png"
                        width="185" height="63"
                        alt="Логотип HTML Academy">
               </a>
