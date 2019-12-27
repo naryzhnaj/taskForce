@@ -10,7 +10,7 @@ use yii\base\Model;
 class TaskSearchForm extends Model
 {
     public $period;
-    public $same_city;
+    public $without_responds;
     public $is_distant;
     public $categories;
     public $title;
@@ -18,8 +18,8 @@ class TaskSearchForm extends Model
     public function rules()
     {
         return [
-            [['same_city', 'is_distant'], 'boolean'],
-            ['same_city', 'default', 'value' => false],
+            [['without_responds', 'is_distant'], 'boolean'],
+            ['without_responds', 'default', 'value' => false],
             ['is_distant', 'default', 'value' => false],
             ['categories', 'default', 'value' => []],
             ['period', 'in', 'range' => ['day', 'week', 'month']],
@@ -30,7 +30,7 @@ class TaskSearchForm extends Model
     public function attributeLabels()
     {
         return [
-            'same_city' => 'Мой город',
+            'without_responds' => 'Без откликов',
             'is_distant' => 'Удаленная работа',
         ];
     }
