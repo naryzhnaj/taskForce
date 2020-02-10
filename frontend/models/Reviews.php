@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace frontend\models;
 
 use Yii;
 
@@ -34,8 +34,8 @@ class Reviews extends \yii\db\ActiveRecord
     {
         return [
             [['task_id', 'user_id', 'value'], 'integer'],
-            [['dt_add'], 'safe'],
-            [['value'], 'required'],
+            ['dt_add', 'safe'],
+            ['value', 'required'],
             [['comment'], 'string', 'max' => 255],
             [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tasks::className(), 'targetAttribute' => ['task_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],

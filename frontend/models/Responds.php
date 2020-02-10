@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace frontend\models;
 
 use Yii;
 
@@ -37,7 +37,7 @@ class Responds extends \yii\db\ActiveRecord
             [['author_id', 'task_id', 'price'], 'integer'],
             [['dt_add'], 'safe'],
             [['price'], 'required'],
-            [['comment'], 'string', 'max' => 255],
+            ['comment', 'string', 'max' => 255],
             [['status'], 'string', 'max' => 11],
             [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tasks::className(), 'targetAttribute' => ['task_id' => 'id']],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['author_id' => 'id']],
