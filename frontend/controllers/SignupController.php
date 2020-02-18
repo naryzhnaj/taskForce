@@ -15,6 +15,9 @@ class SignupController extends \yii\web\Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
+                'denyCallback' => function ($rule, $action) {
+                    $this->goHome();
+                },
                 'rules' => [
                     [
                         'allow' => true,
@@ -39,7 +42,7 @@ class SignupController extends \yii\web\Controller
                 $user->email = $form->email;
                 $user->city_id = $form->city;
 
-                $user->save(false);
+                $user->save(false);             
                 $this->goHome();
             }
         }

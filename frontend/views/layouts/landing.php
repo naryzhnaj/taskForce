@@ -7,7 +7,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use frontend\assets\AppAsset;
-use yii\widgets\ActiveForm;
+
 AppAsset::register($this);
 ?>
 <?php $this->beginPage(); ?>
@@ -56,7 +56,7 @@ AppAsset::register($this);
                <p>Работа там, где ты!</p>
             </div>
             <div class="header__account--index">
-                <a href="<?=Url::toRoute('login'); ?>" class="header__account-enter open-modal" data-for="enter-form">
+                <a href="#" class="header__account-enter open-modal" data-for="enter-form">
                     <span>Вход</span></a>
                 или
                 <a href="<?=Url::toRoute('/signup'); ?>" class="header__account-registration">
@@ -155,11 +155,8 @@ AppAsset::register($this);
                     </div>
                 </div>
             </div>
-            <div class="landing-bottom">
-                <div class="landing-bottom-container">
-                    <h2>Последние задания на сайте</h2>
-                    <?= $content; ?> 
-                </div>              
+            <div class="landing-bottom">           
+                <?= $content; ?>          
             </div>
         </div>
     </main>

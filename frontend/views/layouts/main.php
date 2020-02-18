@@ -5,27 +5,25 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\bootstrap\Nav;
-use yii\bootstrap\NavBar;
-use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
-use common\widgets\Alert;
+use frontend\models\Cities;
 
 AppAsset::register($this);
+$all_cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
 ?>
-<?php $this->beginPage() ?>
+<?php $this->beginPage(); ?>
 <!DOCTYPE html>
-<html lang="<?= Yii::$app->language ?>">
+<html lang="<?= Yii::$app->language; ?>">
 <head>
-    <meta charset="<?= Yii::$app->charset ?>">
+    <meta charset="<?= Yii::$app->charset; ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php $this->registerCsrfMetaTags() ?>
-    <title><?= Html::encode($this->title) ?></title>
-    <?php $this->head() ?>
+    <?php $this->registerCsrfMetaTags(); ?>
+    <title><?= Html::encode($this->title); ?></title>
+    <?php $this->head(); ?>
 </head>
 <body>
-<?php $this->beginBody() ?>
+<?php $this->beginBody(); ?>
 <div class="table-layout">
   <header class="page-header">
       <div class="main-container page-header__container">
@@ -105,7 +103,7 @@ AppAsset::register($this);
                        alt="Аватар пользователя">
               </a>
               <span class="header__account-name">
-               Василий
+                <?= (Yii::$app->user->isGuest) ? 'Василий' : Yii::$app->user->identity->name; ?>
            </span>
           </div>
           <div class="account__pop-up">
@@ -117,7 +115,7 @@ AppAsset::register($this);
                       <a href="#">Настройки</a>
                   </li>
                   <li>
-                      <a href="#">Выход</a>
+                      <a href="<?=Url::toRoute('/site/logout'); ?>">Выход</a>
                   </li>
               </ul>
           </div>
@@ -125,7 +123,7 @@ AppAsset::register($this);
   </header>
   <main class="page-main">
       <div class="main-container page-container">
-        <?= $content ?>
+        <?= $content; ?>
       </div>
   </main>
   <footer class="page-footer">
@@ -170,10 +168,13 @@ AppAsset::register($this);
                        alt="Логотип HTML Academy">
               </a>
           </div>
+          <?php if (isset($this->blocks['woman'])):?>
+              <?= $this->blocks['woman']; ?>
+          <?php endif; ?>
       </div>
   </footer>
 </div>
-<?php $this->endBody() ?>
+<?php $this->endBody(); ?>
 </body>
 </html>
-<?php $this->endPage() ?>
+<?php $this->endPage(); ?>

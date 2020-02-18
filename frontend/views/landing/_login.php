@@ -1,7 +1,6 @@
 <?php
 /**
- * 
- * @var ActiveForm $form
+ * @var ActiveForm
  * @var LoginForm  $model
  */
 use yii\widgets\ActiveForm;
@@ -20,11 +19,12 @@ use yii\helpers\Html;
       'fieldConfig' => ['labelOptions' => ['class' => 'form-modal-description']],
       ]);
    ?>
-   <?=$form->field($model, 'email')->input('email', ['class'=>'input input-middle']); ?>
-   <?=$form->field($model, 'password')->passwordInput(['class'=>'input input-middle']); ?>
+   <?=$form->field($model, 'email', ['template' => '{label}<br>{input}<br>{error}'])
+      ->input('email', ['class' => 'input input-middle', 'autofocus' => true]); ?>
+   <?=$form->field($model, 'password')->passwordInput(['class' => 'input input-middle']); ?>
    <?php
       echo Html::submitButton('Войти', ['class' => 'button']);
       ActiveForm::end();
    ?>
-   <button class="form-modal-close" id="close-modal" type="button">Закрыть</button>
+   <button class="form-modal-close" type="button">Закрыть</button>
 </section>
