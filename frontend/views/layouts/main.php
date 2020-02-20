@@ -81,21 +81,23 @@ $all_cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
               </select>
           </div>
           <div class="header__lightbulb"></div>
-          <div class="lightbulb__pop-up">
-              <h3>Новые события</h3>
-              <p class="lightbulb__new-task lightbulb__new-task--message">
-                  Новое сообщение в чате
-                  <a href="#" class="link-regular">«Помочь с курсовой»</a>
-              </p>
-              <p class="lightbulb__new-task lightbulb__new-task--executor">
-                  Выбран исполнитель для
-                  <a href="#" class="link-regular">«Помочь с курсовой»</a>
-              </p>
-              <p class="lightbulb__new-task lightbulb__new-task--close">
-                  Завершено задание
-                  <a href="#" class="link-regular">«Помочь с курсовой»</a>
-              </p>
-          </div>
+          <?php if (!Yii::$app->user->isGuest): ?>
+            <div class="lightbulb__pop-up">
+                <h3>Новые события</h3>
+                <p class="lightbulb__new-task lightbulb__new-task--message">
+                    Новое сообщение в чате
+                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
+                </p>
+                <p class="lightbulb__new-task lightbulb__new-task--executor">
+                    Выбран исполнитель для
+                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
+                </p>
+                <p class="lightbulb__new-task lightbulb__new-task--close">
+                    Завершено задание
+                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
+                </p>
+            </div>
+          <?php endif; ?>
           <div class="header__account">
               <a class="header__account-photo">
                   <img src="/img/user-photo.png"
@@ -103,22 +105,24 @@ $all_cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
                        alt="Аватар пользователя">
               </a>
               <span class="header__account-name">
-                <?= (Yii::$app->user->isGuest) ? 'Василий' : Yii::$app->user->identity->name; ?>
+                <?= (Yii::$app->user->isGuest) ? 'Гость' : Yii::$app->user->identity->name; ?>
            </span>
           </div>
-          <div class="account__pop-up">
-              <ul class="account__pop-up-list">
-                  <li>
-                      <a href="#">Мои задания</a>
-                  </li>
-                  <li>
-                      <a href="#">Настройки</a>
-                  </li>
-                  <li>
-                      <a href="<?=Url::toRoute('/site/logout'); ?>">Выход</a>
-                  </li>
-              </ul>
-          </div>
+          <?php if (!Yii::$app->user->isGuest): ?>
+            <div class="account__pop-up">
+                <ul class="account__pop-up-list">
+                    <li>
+                        <a href="#">Мои задания</a>
+                    </li>
+                    <li>
+                        <a href="#">Настройки</a>
+                    </li>
+                    <li>
+                        <a href="<?=Url::toRoute('/site/logout'); ?>">Выход</a>
+                    </li>
+                </ul>
+            </div>
+          <?php endif; ?>
       </div>
   </header>
   <main class="page-main">
