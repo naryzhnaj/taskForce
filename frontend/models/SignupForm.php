@@ -1,5 +1,5 @@
 <?php
-namespace app\models;
+namespace frontend\models;
 
 use yii\base\Model;
 
@@ -17,11 +17,11 @@ class SignupForm extends Model
     {
         return [
             ['username', 'required', 'message' => 'Введите ваше имя и фамилию'],
-            [['username', 'email'], 'trim'],
+            [['username', 'password', 'email'], 'trim'],
             ['city', 'safe'],
             [['email', 'password'], 'required', 'message' => 'Это поле необходимо заполнить'],
             ['email', 'email', 'message' => 'Введите валидный адрес электронной почты'],
-            ['email', 'unique', 'targetClass' => '\app\models\Users', 'message' => 'Извините, данный адрес занят'],
+            ['email', 'unique', 'targetClass' => '\frontend\models\Users', 'message' => 'Извините, данный адрес занят'],
             ['password', 'string', 'min' => 8, 'message' => 'Длина пароля от 8 символов'],
         ];
     }

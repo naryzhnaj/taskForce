@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace frontend\models;
 
 use yii\base\Model;
 
@@ -10,7 +10,7 @@ use yii\base\Model;
 class TaskSearchForm extends Model
 {
     public $period;
-    public $same_city;
+    public $without_responds;
     public $is_distant;
     public $categories;
     public $title;
@@ -18,8 +18,8 @@ class TaskSearchForm extends Model
     public function rules()
     {
         return [
-            [['same_city', 'is_distant'], 'boolean'],
-            ['same_city', 'default', 'value' => false],
+            [['without_responds', 'is_distant'], 'boolean'],
+            ['without_responds', 'default', 'value' => false],
             ['is_distant', 'default', 'value' => false],
             ['categories', 'default', 'value' => []],
             ['period', 'in', 'range' => ['day', 'week', 'month']],
@@ -30,7 +30,7 @@ class TaskSearchForm extends Model
     public function attributeLabels()
     {
         return [
-            'same_city' => 'Мой город',
+            'without_responds' => 'Без откликов',
             'is_distant' => 'Удаленная работа',
         ];
     }
@@ -43,20 +43,25 @@ class TaskSearchForm extends Model
             case 'month': $term = '30 day';
         }
 
-        return 'INTERVAL ' . $term;
+        return 'INTERVAL '.$term;
     }
 
     public function search($query)
     {
-        if ($this->title) {
-            $query->andWhere(['like', 'title', $this->title]);
-        }
+        $query->andFilterWhere(['like', 'title', $this->title]);
 
         $query->andWhere(($this->is_distant) ? 'address IS NULL' : 'address IS NOT NULL');
-        $query->andWhere('dt_add >= DATE_SUB(now(),' . $this->interval . ')');
+
+        if ($this->period != 'all') {
+            $query->andWhere('dt_add >= DATE_SUB(now(),'.$this->interval.')');
+        }
 
         if ($this->categories) {
             $query->andWhere(['category_id' => $this->categories]);
+        }
+
+        if ($this->without_responds) {
+            $query->joinWith('responds')->where('responds.task_id is NULL');
         }
     }
 }

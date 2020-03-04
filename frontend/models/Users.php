@@ -1,37 +1,61 @@
 <?php
 
-namespace app\models;
-
-use Yii;
+namespace frontend\models;
 
 /**
  * This is the model class for table "users".
  *
- * @property int $id
- * @property int $city_id
- * @property string $name
- * @property string $email
- * @property string $password
- * @property string $rating
- * @property int $orders
- * @property int $failures
- * @property int $popularity
- * @property string $dt_add
- *
- * @property Accounts[] $accounts
- * @property Chats[] $chats
- * @property Chats[] $chats0
- * @property Favorites[] $favorites
- * @property Favorites[] $favorites0
- * @property Responds[] $responds
- * @property Reviews[] $reviews
+ * @property int              $id
+ * @property int              $city_id
+ * @property string           $name
+ * @property string           $email
+ * @property string           $password
+ * @property string           $rating
+ * @property int              $orders
+ * @property int              $failures
+ * @property int              $popularity
+ * @property string           $dt_add
+ * @property Accounts[]       $accounts
+ * @property Chats[]          $chats
+ * @property Chats[]          $chats0
+ * @property Favorites[]      $favorites
+ * @property Favorites[]      $favorites0
+ * @property Responds[]       $responds
+ * @property Reviews[]        $reviews
  * @property Specialization[] $specializations
- * @property Tasks[] $tasks
- * @property Tasks[] $tasks0
- * @property Cities $city
+ * @property Tasks[]          $tasks
+ * @property Tasks[]          $tasks0
+ * @property Cities           $city
  */
-class Users extends \yii\db\ActiveRecord
+class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
+    public static function findIdentity($id)
+    {
+        return self::findOne($id);
+    }
+
+    public static function findIdentityByAccessToken($token, $type = null)
+    {
+    }
+
+    public function getId()
+    {
+        return $this->getPrimaryKey();
+    }
+
+    public function getAuthKey()
+    {
+    }
+
+    public function validateAuthKey($authKey)
+    {
+    }
+
+    public function validatePassword($password)
+    {
+        return \Yii::$app->security->validatePassword($password, $this->password);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -52,7 +76,7 @@ class Users extends \yii\db\ActiveRecord
             [['dt_add'], 'safe'],
             [['name', 'email'], 'string', 'max' => 60],
             [['password'], 'string', 'max' => 128],
-            [['email'], 'unique'],
+            ['email', 'unique'],
             [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::className(), 'targetAttribute' => ['city_id' => 'id']],
         ];
     }
@@ -143,7 +167,7 @@ class Users extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSpecializations()
+    public function getSpecialization()
     {
         return $this->hasMany(Specialization::className(), ['user_id' => 'id']);
     }

@@ -1,9 +1,18 @@
 <?php
-/* @var $this yii\web\View */
+/**
+ * @var yii\web\View
+ * @var ActiveForm     $form
+ * @var TaskSearchForm $model
+ * @var $tasks         найденные задачи
+ * @var array          $all_categories список категорий
+*/
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 
+/**
+ * шаблон для отрисовки чекбоксов.
+ */
 $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value) {
     return '<div class="form-group">'
     .Html::checkbox($name, $checked, ['value' => $value, 'id' => $index, 'class' => 'visually-hidden checkbox__input'])
@@ -16,7 +25,9 @@ $this->title = 'Новые задания';
   <div class="new-task__wrapper">
       <h1>Новые задания</h1>
       <?php
-        if (!$tasks) echo 'Извините, ничего не найдено';
+        if (!$tasks) {
+            echo 'Извините, ничего не найдено';
+        }
         foreach ($tasks as $task): ?>
           <div class="new-task__card">
               <div class="new-task__title">
@@ -29,10 +40,10 @@ $this->title = 'Новые задания';
                 <b class="new-task__price new-task__price--<?=Html::encode($task->category->icon); ?>">
                     <?=Html::encode($task->budget); ?><b>₽</b>
                 </b>
-              <?php endif;?>
+              <?php endif; ?>
               <?php if (isset($task->address)):?>
                   <p class="new-task__place"><?=Html::encode($task->address); ?></p>
-              <?php endif;?>
+              <?php endif; ?>
               <span class="new-task__time"><?= Yii::$app->formatter->asRelativeTime($task->dt_add); ?></span>
           </div>
       <?php endforeach; ?>
@@ -53,12 +64,12 @@ $this->title = 'Новые задания';
       <?php $form = ActiveForm::begin([
           'id' => 'search-task',
           'enableClientValidation' => true,
-              'validateOnSubmit' => true,
-              'validateOnChange' => true,
-              'options' => [
-                  'method' => 'post',
-                  'class' => 'search-task__form'
-        ]]); ?>
+          'validateOnSubmit' => true,
+          'validateOnChange' => true,
+          'options' => [
+            'method' => 'post',
+            'class' => 'search-task__form',
+        ], ]); ?>
           <fieldset class="search-task__categories">
               <legend>Категории</legend>
               <?= $form->field($model, 'categories')->checkboxList($all_categories, ['item' => $checkboxTemplateCallback])->label(false); ?>
@@ -66,7 +77,7 @@ $this->title = 'Новые задания';
           <fieldset class="search-task__categories">
               <legend>Дополнительно</legend>
               <?php
-                echo $form->field($model, 'same_city', ['template' => '{input}{label}{error}'])->
+                echo $form->field($model, 'without_responds', ['template' => '{input}{label}{error}'])->
                     checkbox(['class' => 'visually-hidden checkbox__input'], false);
                 echo $form->field($model, 'is_distant', ['template' => '{input}{label}{error}'])->
                     checkbox(['class' => 'visually-hidden checkbox__input'], false);
@@ -74,11 +85,12 @@ $this->title = 'Новые задания';
           </fieldset>
           <?php
             echo $form->field($model, 'period', ['template' => '{label}<br>{input}'])->dropDownList([
-                  'month' => 'За месяц',
-                  'week' => 'За неделю',
-                  'day' => 'За день'],
-                  ['class' => 'multiple-select input'])
-                  ->label('Период', ['class' => 'search-task__name']);
+                'all' => 'За всё время',
+                'day' => 'За день',
+                'week' => 'За неделю',
+                'month' => 'За месяц', ],
+                ['class' => 'multiple-select input'])
+                ->label('Период', ['class' => 'search-task__name']);
             echo $form->field($model, 'title')->input('search', ['class' => 'input-middle input'])
                 ->label('Поиск по названию', ['class' => 'search-task__name']);
 

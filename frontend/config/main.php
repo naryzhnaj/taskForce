@@ -1,4 +1,5 @@
 <?php
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -16,8 +17,9 @@ return [
             'csrfParam' => '_csrf-frontend',
         ],
         'user' => [
-            'identityClass' => 'common\models\User',
+            'identityClass' => 'frontend\models\Users',
             'enableAutoLogin' => true,
+            'loginUrl' => '/landing',
             'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
         ],
         'session' => [
@@ -41,7 +43,8 @@ return [
             'showScriptName' => false,
             'enableStrictParsing' => false,
             'rules' => [
-                '/task/view/<id:\d+>' => 'tasks/show'
+                '/task/view/<id:\d+>' => 'tasks/show',
+                '/' => 'tasks',
             ],
         ],
     ],

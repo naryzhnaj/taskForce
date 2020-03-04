@@ -5,27 +5,25 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\bootstrap\Nav;
-use yii\bootstrap\NavBar;
-use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
-use common\widgets\Alert;
+use frontend\models\Cities;
 
 AppAsset::register($this);
+$all_cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
 ?>
-<?php $this->beginPage() ?>
+<?php $this->beginPage(); ?>
 <!DOCTYPE html>
-<html lang="<?= Yii::$app->language ?>">
+<html lang="<?= Yii::$app->language; ?>">
 <head>
-    <meta charset="<?= Yii::$app->charset ?>">
+    <meta charset="<?= Yii::$app->charset; ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php $this->registerCsrfMetaTags() ?>
-    <title><?= Html::encode($this->title) ?></title>
-    <?php $this->head() ?>
+    <?php $this->registerCsrfMetaTags(); ?>
+    <title><?= Html::encode($this->title); ?></title>
+    <?php $this->head(); ?>
 </head>
 <body>
-<?php $this->beginBody() ?>
+<?php $this->beginBody(); ?>
 <div class="table-layout">
   <header class="page-header">
       <div class="main-container page-header__container">
@@ -83,21 +81,23 @@ AppAsset::register($this);
               </select>
           </div>
           <div class="header__lightbulb"></div>
-          <div class="lightbulb__pop-up">
-              <h3>Новые события</h3>
-              <p class="lightbulb__new-task lightbulb__new-task--message">
-                  Новое сообщение в чате
-                  <a href="#" class="link-regular">«Помочь с курсовой»</a>
-              </p>
-              <p class="lightbulb__new-task lightbulb__new-task--executor">
-                  Выбран исполнитель для
-                  <a href="#" class="link-regular">«Помочь с курсовой»</a>
-              </p>
-              <p class="lightbulb__new-task lightbulb__new-task--close">
-                  Завершено задание
-                  <a href="#" class="link-regular">«Помочь с курсовой»</a>
-              </p>
-          </div>
+          <?php if (!Yii::$app->user->isGuest): ?>
+            <div class="lightbulb__pop-up">
+                <h3>Новые события</h3>
+                <p class="lightbulb__new-task lightbulb__new-task--message">
+                    Новое сообщение в чате
+                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
+                </p>
+                <p class="lightbulb__new-task lightbulb__new-task--executor">
+                    Выбран исполнитель для
+                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
+                </p>
+                <p class="lightbulb__new-task lightbulb__new-task--close">
+                    Завершено задание
+                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
+                </p>
+            </div>
+          <?php endif; ?>
           <div class="header__account">
               <a class="header__account-photo">
                   <img src="/img/user-photo.png"
@@ -105,27 +105,29 @@ AppAsset::register($this);
                        alt="Аватар пользователя">
               </a>
               <span class="header__account-name">
-               Василий
+                <?= (Yii::$app->user->isGuest) ? 'Гость' : Yii::$app->user->identity->name; ?>
            </span>
           </div>
-          <div class="account__pop-up">
-              <ul class="account__pop-up-list">
-                  <li>
-                      <a href="#">Мои задания</a>
-                  </li>
-                  <li>
-                      <a href="#">Настройки</a>
-                  </li>
-                  <li>
-                      <a href="#">Выход</a>
-                  </li>
-              </ul>
-          </div>
+          <?php if (!Yii::$app->user->isGuest): ?>
+            <div class="account__pop-up">
+                <ul class="account__pop-up-list">
+                    <li>
+                        <a href="#">Мои задания</a>
+                    </li>
+                    <li>
+                        <a href="#">Настройки</a>
+                    </li>
+                    <li>
+                        <a href="<?=Url::toRoute('/site/logout'); ?>">Выход</a>
+                    </li>
+                </ul>
+            </div>
+          <?php endif; ?>
       </div>
   </header>
   <main class="page-main">
       <div class="main-container page-container">
-        <?= $content ?>
+        <?= $content; ?>
       </div>
   </main>
   <footer class="page-footer">
@@ -170,10 +172,13 @@ AppAsset::register($this);
                        alt="Логотип HTML Academy">
               </a>
           </div>
+          <?php if (isset($this->blocks['woman'])):?>
+              <?= $this->blocks['woman']; ?>
+          <?php endif; ?>
       </div>
   </footer>
 </div>
-<?php $this->endBody() ?>
+<?php $this->endBody(); ?>
 </body>
 </html>
-<?php $this->endPage() ?>
+<?php $this->endPage(); ?>
