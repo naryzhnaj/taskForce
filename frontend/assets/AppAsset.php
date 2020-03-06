@@ -16,10 +16,7 @@ class AppAsset extends AssetBundle
         'css/normalize.css',
         'css/style.css'
     ];
-    public $js = [
-        'js/dropzone.js',
-        'js/main.js',
-    ];
+    public $js = [];
     public $depends = [
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',

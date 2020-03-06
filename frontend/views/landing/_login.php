@@ -11,7 +11,9 @@ use yii\helpers\Html;
    <h2>Вход на сайт</h2>
    <?php
       $form = ActiveForm::begin([
+         'id' => 'login-form',
          'enableClientValidation' => true,
+         'enableAjaxValidation' => true,
          'validateOnSubmit' => true,
          'options' => [
             'method' => 'post',

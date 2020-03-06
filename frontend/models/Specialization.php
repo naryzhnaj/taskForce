@@ -1,17 +1,14 @@
 <?php
 
-namespace app\models;
-
-use Yii;
+namespace frontend\models;
 
 /**
  * This is the model class for table "specialization".
  *
- * @property int $id
- * @property int $user_id
- * @property int $category_id
- *
- * @property Users $user
+ * @property int        $id
+ * @property int        $user_id
+ * @property int        $category_id
+ * @property Users      $user
  * @property Categories $category
  */
 class Specialization extends \yii\db\ActiveRecord
@@ -62,5 +59,17 @@ class Specialization extends \yii\db\ActiveRecord
     public function getCategory()
     {
         return $this->hasOne(Categories::className(), ['id' => 'category_id']);
+    }
+
+    /**
+     * проверка, является ли пользователь исполнителем
+     *
+     * @var int id пользователя
+     *
+     * @return boolean
+     */
+    public static function isUserDoer($id)
+    {
+        return self::find()->where(['user_id' => $id])->exists();
     }
 }

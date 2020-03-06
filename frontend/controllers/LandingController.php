@@ -41,8 +41,10 @@ class LandingController extends \yii\web\Controller
             ->limit(self::CARDS_AMOUNT)->all();
 
         if (Yii::$app->request->getIsPost()) {
-            $form->load(Yii::$app->request->post());
-
+            $form->load(Yii::$app->request->post());          
+            if (Yii::$app->request->isAjax) {
+                return ActiveForm::validate($form);
+            }
             if ($form->validate()) {
                 $user = $form->getUser();
                 Yii::$app->user->login($user);

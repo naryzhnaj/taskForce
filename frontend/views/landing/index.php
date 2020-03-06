@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\helpers\StringHelper;
 
 $this->title = 'TaskForse';
+$this->registerJsFile('js/main.js');
 ?>
 <div class="landing-bottom-container">
     <h2>Последние задания на сайте</h2>
