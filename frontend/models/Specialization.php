@@ -64,7 +64,7 @@ class Specialization extends \yii\db\ActiveRecord
     /**
      * проверка, является ли пользователь исполнителем
      *
-     * @var int id пользователя
+     * @param int $id пользователя
      *
      * @return boolean
      */
