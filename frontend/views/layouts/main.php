@@ -56,20 +56,20 @@ $all_cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
               </a>
           </div>
           <div class="header__nav">
-              <ul class="header-nav__list site-list">
-                  <li class="site-list__item">
-                      <a href="<?=Url::toRoute('/tasks'); ?>">Задания</a>
-                  </li>
-                  <li class="site-list__item">
-                      <a href="#">Исполнители</a>
-                  </li>
-                  <li class="site-list__item">
-                      <a href="#">Создать задание</a>
-                  </li>
-                  <li class="site-list__item">
-                      <a>Мой профиль</a>
-                  </li>
-              </ul>
+            <ul class="header-nav__list site-list">
+                <li class="site-list__item">
+                    <a href="<?=Url::toRoute('/tasks'); ?>">Задания</a>
+                </li>
+                <li class="site-list__item">
+                    <a href="#">Исполнители</a>
+                </li>
+                <li class="site-list__item">
+                    <a href="<?=Url::toRoute('/tasks/create'); ?>">Создать задание</a>
+                </li>
+                <li class="site-list__item">
+                    <a>Мой профиль</a>
+                </li>
+            </ul>   
           </div>
           <div class="header__town">
               <select class="multiple-select input town-select" size="1" name="town[]">

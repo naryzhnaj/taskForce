@@ -5,12 +5,30 @@ namespace frontend\controllers;
 use Yii;
 use frontend\models\Tasks;
 use frontend\models\Categories;
+use frontend\models\Specialization;
 use frontend\models\TaskSearchForm;
+use frontend\models\TaskCreateForm;
 use yii\web\NotFoundHttpException;
 
 class TasksController extends \frontend\controllers\SecuredController
 {
     private const CARDS_AMOUNT = 5;
+    
+    // закрыть исполнителям доступ к созданию заданий
+    public function behaviors()
+    {
+        $rules = parent::behaviors();
+        $rule = [
+            'allow' => false,
+            'actions' => ['create'],
+            'matchCallback' => function ($rule, $action) {
+                return Specialization::isUserDoer(Yii::$app->user->id);
+            }
+        ];
+        array_unshift($rules['access']['rules'], $rule);
+
+        return $rules;
+    }
 
     public function actionIndex()
     {
@@ -37,7 +55,7 @@ class TasksController extends \frontend\controllers\SecuredController
         return $this->render('index', ['tasks' => $tasks, 'all_categories' => $all_categories, 'model' => $form]);
     }
 
-    public function actionShow($id)
+    public function actionShow(int $id)
     {
         $task = Tasks::findOne($id);
         if (!$task) {
@@ -51,5 +69,27 @@ class TasksController extends \frontend\controllers\SecuredController
         $responds = $task->responds;
 
         return $this->render('view', ['task' => $task, 'category' => $category, 'customer' => $customer, 'responds' => $responds]);
+    }
+
+    public function actionCreate()
+    {
+        $all_categories = Categories::find()->select(['title', 'id'])->indexBy('id')->column();
+        $form = new TaskCreateForm();
+
+        if (Yii::$app->request->getIsPost()) {
+            $form->load(Yii::$app->request->post());
+            if ($form->validate()) {
+                $task = new Tasks();
+                $task->attributes = $form->attributes;
+        
+                $task->author_id = Yii::$app->user->id;
+                $task->save(false);
+                // проверяет и сохраняет загруженные файлы
+                $form->upload($task->id);
+
+                $this->goHome();
+            }
+        }
+        return $this->render('create', ['all_categories' => $all_categories, 'model' => $form]);
     }
 }
