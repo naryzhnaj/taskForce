@@ -5,7 +5,7 @@ namespace frontend\models;
 use Yii;
 
 /**
- * This is the model class for table "application".
+ * This is the model class for table "attachment".
  *
  * @property int $id
  * @property int $task_id
@@ -13,14 +13,14 @@ use Yii;
  *
  * @property Tasks $task
  */
-class Application extends \yii\db\ActiveRecord
+class Attachment extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'application';
+        return 'attachment';
     }
 
     /**

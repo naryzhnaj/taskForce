@@ -19,10 +19,10 @@ use Yii;
  * @property string $address
  * @property string $lat
  * @property string $longitude
- * @property string $image
  * @property string $status
  * @property string $dt_add
  *
+ * @property Attachment[] $attachments
  * @property Chats[] $chats
  * @property Responds[] $responds
  * @property Reviews[] $reviews
@@ -52,7 +52,7 @@ class Tasks extends \yii\db\ActiveRecord
             [['end_date', 'dt_add'], 'safe'],
             [['lat', 'longitude'], 'number'],
             [['title', 'address'], 'string', 'max' => 128],
-            [['description', 'image'], 'string', 'max' => 255],
+            [['description'], 'string', 'max' => 255],
             [['status'], 'string', 'max' => 11],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['author_id' => 'id']],
             [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['executor_id' => 'id']],
@@ -79,10 +79,17 @@ class Tasks extends \yii\db\ActiveRecord
             'address' => 'Address',
             'lat' => 'Lat',
             'longitude' => 'Longitude',
-            'image' => 'Image',
             'status' => 'Status',
             'dt_add' => 'Dt Add',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAttachments()
+    {
+        return $this->hasMany(Attachment::className(), ['task_id' => 'id']);
     }
 
     /**
