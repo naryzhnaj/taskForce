@@ -26,9 +26,10 @@ class TaskCreateForm extends Model
             ['title', 'string', 'min' => 10],
             ['description', 'string', 'min' => 30],
 
-            ['files', 'file', 'maxFiles' => 10],
+            ['files', 'file', 'maxFiles' => 0],
             ['category_id', 'required', 'message' => 'Задание должно принадлежать одной из категорий'],
-            ['category_id', 'in', 'range' => \frontend\models\Categories::find()->select('id')->asArray()->column()],
+            ['category_id', 'exist', 'skipOnError' => true, 'targetClass' => Categories::className(), 'targetAttribute' => ['category_id' => 'id']],
+
             ['budget', 'integer', 'min' => 1],
             ['end_date', 'date', 'min' => time(), 'message' => 'Выберите дату из будущего'],
         ];
@@ -48,7 +49,7 @@ class TaskCreateForm extends Model
     }
 
     /**
-     * если есть приложения, то сохраняет на сервере в папке uploads и в DB.
+     * если есть приложения, то сохраняет на сервере в папке uploads и в БД.
      *
      * @param int $task id записи
      *
@@ -57,15 +58,18 @@ class TaskCreateForm extends Model
     public function upload(int $task): bool
     {
         $this->files = UploadedFile::getInstances($this, 'files');
-        if ($this->files) {
+        if (isset($this->files)) {
             foreach ($this->files as $file) {
                 $filename = $task.'_'.$file->baseName.'.'.$file->extension;
-                $file->saveAs("uploads/$filename");
-
-                $new_file = new Application();
+                if (!$file->saveAs("uploads/$filename")) {
+                    throw new \Exception("Не удалось сохранить $file->baseName");
+                }
+                $new_file = new Attachment();
                 $new_file->task_id = $task;
                 $new_file->filename = $filename;
-                $new_file->save();
+                if (!$new_file->save()) {
+                    throw new \Exception("Не удалось сохранить $file->name в базу");
+                }
             }
         }
 

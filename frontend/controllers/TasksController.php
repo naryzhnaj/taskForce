@@ -23,6 +23,9 @@ class TasksController extends \frontend\controllers\SecuredController
             'actions' => ['create'],
             'matchCallback' => function ($rule, $action) {
                 return Specialization::isUserDoer(Yii::$app->user->id);
+            },
+            'denyCallback' => function ($rule, $action) {
+                throw new \Exception('Извините, только заказчики могут создавать задачи');
             }
         ];
         array_unshift($rules['access']['rules'], $rule);
@@ -30,6 +33,11 @@ class TasksController extends \frontend\controllers\SecuredController
         return $rules;
     }
 
+    /**
+     * выводит список последних задач
+     * @throws NotFoundHttpException
+     * @return mixed
+     */
     public function actionIndex()
     {
         $all_categories = Categories::find()->select(['title', 'id'])->indexBy('id')->column();
@@ -41,7 +49,7 @@ class TasksController extends \frontend\controllers\SecuredController
         // стартовый запрос
         $query = Tasks::find()
             ->select('tasks.id, category_id, title, description, budget, address, tasks.dt_add')
-            ->where(['status' => 'new'])->andWhere('end_date >= now()');
+            ->where(['status' => Tasks::STATUS_NEW])->andWhere('end_date >= now() OR end_date IS NULL');
 
         // добавляются условия из формы
         if (Yii::$app->request->getIsPost()) {
@@ -55,12 +63,18 @@ class TasksController extends \frontend\controllers\SecuredController
         return $this->render('index', ['tasks' => $tasks, 'all_categories' => $all_categories, 'model' => $form]);
     }
 
+    /**
+     * показывает карточку конкретного задания
+     * @param integer $id id задания
+     * @throws NotFoundHttpException
+     * @return mixed
+     */
     public function actionShow(int $id)
     {
         $task = Tasks::findOne($id);
         if (!$task) {
             throw new NotFoundHttpException("Задание с ID $id не найдено");
-        } elseif ($task->status !== 'new') {
+        } elseif ($task->status !== Tasks::STATUS_NEW) {
             throw new NotFoundHttpException("Извините, задание с ID $id неактуально");
         }
 
@@ -71,23 +85,32 @@ class TasksController extends \frontend\controllers\SecuredController
         return $this->render('view', ['task' => $task, 'category' => $category, 'customer' => $customer, 'responds' => $responds]);
     }
 
+    /**
+     * создание нового задания
+     * @throws NotFoundHttpException
+     * @return mixed
+     */
     public function actionCreate()
     {
-        $all_categories = Categories::find()->select(['title', 'id'])->indexBy('id')->column();
+        $all_categories = Categories::find()->select(['title', 'id'])->orderBy(['title' => SORT_ASC])->indexBy('id')->column();
         $form = new TaskCreateForm();
 
-        if (Yii::$app->request->getIsPost()) {
-            $form->load(Yii::$app->request->post());
+        if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post())) {
             if ($form->validate()) {
-                $task = new Tasks();
-                $task->attributes = $form->attributes;
-        
-                $task->author_id = Yii::$app->user->id;
-                $task->save(false);
-                // проверяет и сохраняет загруженные файлы
-                $form->upload($task->id);
-
-                $this->goHome();
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    $task = new Tasks();
+                    $task->attributes = $form->attributes;
+                    $task->author_id = Yii::$app->user->id;
+                    $task->save();
+                    $form->upload($task->id);
+                  
+                    $transaction->commit();
+                    return $this->goHome();
+                } catch (\Exception $e) {
+                    $transaction->rollback();
+                    throw new NotFoundHttpException("Извините, при сохранении произошла ошибка");
+                }
             }
         }
         return $this->render('create', ['all_categories' => $all_categories, 'model' => $form]);

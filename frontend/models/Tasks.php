@@ -33,6 +33,7 @@ use Yii;
  */
 class Tasks extends \yii\db\ActiveRecord
 {
+    const STATUS_NEW = 'new';
     /**
      * {@inheritdoc}
      */

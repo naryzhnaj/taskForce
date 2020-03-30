@@ -9,8 +9,10 @@ use yii\filters\AccessControl;
 
 class LandingController extends \yii\web\Controller
 {
+    // кол-во выводимых для примера заданий
     private const CARDS_AMOUNT = 4;
 
+    // страница доступна толко для гостей
     public function behaviors()
     {
         return [
@@ -29,22 +31,25 @@ class LandingController extends \yii\web\Controller
         ];
     }
 
+    /**
+     * отрисовывает лэндинг и форму входа
+     * при успешной авторизации юзер переадресуется на страницу с заданиями.
+     *
+     * @return mixed
+     */
     public function actionIndex()
     {
         $this->layout = 'landing';
         $form = new LoginForm();
 
+        // последние задания для примера
         $tasks = $query = Tasks::find()
             ->select('category_id, title, description, budget, dt_add')
-            ->where(['status' => 'new'])->andWhere('end_date >= now()')
+            ->where(['status' => Tasks::STATUS_NEW])->andWhere('end_date >= now()')
             ->orderBy(['dt_add' => SORT_DESC])
             ->limit(self::CARDS_AMOUNT)->all();
 
-        if (Yii::$app->request->getIsPost()) {
-            $form->load(Yii::$app->request->post());          
-            if (Yii::$app->request->isAjax) {
-                return ActiveForm::validate($form);
-            }
+        if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post())) {
             if ($form->validate()) {
                 $user = $form->getUser();
                 Yii::$app->user->login($user);
