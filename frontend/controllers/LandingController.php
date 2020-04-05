@@ -3,9 +3,11 @@
 namespace frontend\controllers;
 
 use Yii;
-use frontend\models\LoginForm;
+use frontend\models\forms\LoginForm;
 use frontend\models\Tasks;
 use yii\filters\AccessControl;
+use yii\widgets\ActiveForm;
+use yii\web\Response;
 
 class LandingController extends \yii\web\Controller
 {
@@ -19,7 +21,7 @@ class LandingController extends \yii\web\Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function ($rule, $action) {
-                     $this->goHome();
+                    $this->goHome();
                 },
                 'rules' => [
                     [
@@ -33,7 +35,7 @@ class LandingController extends \yii\web\Controller
 
     /**
      * отрисовывает лэндинг и форму входа
-     * при успешной авторизации юзер переадресуется на страницу с заданиями.
+     * при успешной авторизации гость переадресуется на страницу с заданиями.
      *
      * @return mixed
      */
@@ -41,23 +43,23 @@ class LandingController extends \yii\web\Controller
     {
         $this->layout = 'landing';
         $form = new LoginForm();
+        $this->view->params['model'] = $form;
 
-        // последние задания для примера
-        $tasks = $query = Tasks::find()
-            ->select('category_id, title, description, budget, dt_add')
-            ->where(['status' => Tasks::STATUS_NEW])->andWhere('end_date >= now()')
-            ->orderBy(['dt_add' => SORT_DESC])
-            ->limit(self::CARDS_AMOUNT)->all();
+        // последние задания для демонстрации
+        $tasks = Tasks::getRecent(self::CARDS_AMOUNT);
 
-        if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post())) {
-            if ($form->validate()) {
+        if (Yii::$app->request->getIsPost() && Yii::$app->request->isAjax) {
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
                 $user = $form->getUser();
                 Yii::$app->user->login($user);
 
                 return $this->goHome();
+            } else {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ActiveForm::validate($form);
             }
         }
 
-        return $this->render('index', ['tasks' => $tasks, 'model' => $form]);
+        return $this->render('index', ['tasks' => $tasks]);
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace frontend\models;
+namespace frontend\models\forms;
 
 use yii\base\Model;
 
@@ -18,7 +18,7 @@ class SignupForm extends Model
         return [
             ['username', 'required', 'message' => 'Введите ваше имя и фамилию'],
             [['username', 'password', 'email'], 'trim'],
-            ['city', 'safe'],
+            ['city', 'exist', 'skipOnEmpty' => true, 'targetClass' => '\frontend\models\Cities', 'targetAttribute' => ['city' => 'id']],
             [['email', 'password'], 'required', 'message' => 'Это поле необходимо заполнить'],
             ['email', 'email', 'message' => 'Введите валидный адрес электронной почты'],
             ['email', 'unique', 'targetClass' => '\frontend\models\Users', 'message' => 'Извините, данный адрес занят'],

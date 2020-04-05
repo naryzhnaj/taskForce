@@ -1,9 +1,12 @@
 <?php
 
-namespace frontend\models;
+namespace frontend\models\forms;
 
+use Yii;
 use yii\base\Model;
 use yii\web\UploadedFile;
+use frontend\models\Tasks;
+use frontend\models\Attachment;
 
 /**
  * Task Create form.
@@ -28,7 +31,7 @@ class TaskCreateForm extends Model
 
             ['files', 'file', 'maxFiles' => 0],
             ['category_id', 'required', 'message' => 'Задание должно принадлежать одной из категорий'],
-            ['category_id', 'exist', 'skipOnError' => true, 'targetClass' => Categories::className(), 'targetAttribute' => ['category_id' => 'id']],
+            ['category_id', 'exist', 'skipOnError' => false, 'targetClass' => '\frontend\models\Categories', 'targetAttribute' => ['category_id' => 'id']],
 
             ['budget', 'integer', 'min' => 1],
             ['end_date', 'date', 'min' => time(), 'message' => 'Выберите дату из будущего'],
@@ -49,20 +52,22 @@ class TaskCreateForm extends Model
     }
 
     /**
-     * если есть приложения, то сохраняет на сервере в папке uploads и в БД.
+     * если есть приложения, то сохраняет на сервере и в БД.
      *
      * @param int $task id записи
-     *
+     * @throws Exception
      * @return bool
      */
-    public function upload(int $task): bool
+    private function upload(int $task): bool
     {
         $this->files = UploadedFile::getInstances($this, 'files');
-        if (isset($this->files)) {
+
+        if (!empty($this->files)) {
             foreach ($this->files as $file) {
-                $filename = $task.'_'.$file->baseName.'.'.$file->extension;
-                if (!$file->saveAs("uploads/$filename")) {
-                    throw new \Exception("Не удалось сохранить $file->baseName");
+                $filename = sprintf('%s_%s.%s', $task, $file->baseName, $file->extension);
+
+                if (!$file->saveAs(sprintf('%s/%s', Yii::getAlias('@uploads'), $filename))) {
+                    throw new \Exception("Не удалось сохранить $file->name");
                 }
                 $new_file = new Attachment();
                 $new_file->task_id = $task;
@@ -74,5 +79,29 @@ class TaskCreateForm extends Model
         }
 
         return true;
+    }
+    
+    /**
+     * сохранение новой задачи
+     * 
+     * @throws ServerErrorHttpException
+     * @return bool
+     */
+    public function createTask()
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $task = new Tasks();
+            $task->attributes = $this->attributes;
+            $task->author_id = Yii::$app->user->id;
+            $task->save();
+            $this->upload($task->id);
+      
+            $transaction->commit();
+            return true;
+        } catch (\Exception $e) {
+            $transaction->rollback();
+            throw new \yii\web\ServerErrorHttpException("Извините, при сохранении произошла ошибка");
+        }
     }
 }

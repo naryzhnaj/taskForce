@@ -204,6 +204,7 @@ AppAsset::register($this);
             </div>
         </div>
     </footer>
+    <?= $this->renderAjax('_login', ['model' => $this->params['model']]); ?>
 </div>
 <div class="overlay"></div>
 <?php $this->endBody(); ?>

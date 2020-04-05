@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models;
+namespace frontend\models\forms;
 
 use yii\base\Model;
 
@@ -35,6 +35,11 @@ class TaskSearchForm extends Model
         ];
     }
 
+    /**
+     * расшифровка выбранного периода
+     *
+     * @return string
+     */
     public function getInterval()
     {
         switch ($this->period) {
@@ -46,6 +51,11 @@ class TaskSearchForm extends Model
         return 'INTERVAL '.$term;
     }
 
+    /**
+     * добавляет к запросу условия в зависимости от выбранных полей
+     *
+     * @param ActiveRecord $query
+     */
     public function search($query)
     {
         $query->andFilterWhere(['like', 'title', $this->title]);

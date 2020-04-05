@@ -1,5 +1,7 @@
 <?php
-namespace frontend\models;
+
+namespace frontend\models\forms;
+
 use yii\base\Model;
 
 class LoginForm extends Model
@@ -13,10 +15,12 @@ class LoginForm extends Model
         return [
             [['email', 'password'], 'required'],
             ['email', 'email'],
+            ['email', 'exist', 'skipOnError' => false, 'targetClass' => '\frontend\models\Users',
+                'targetAttribute' => ['email' => 'email'], 'message' => 'Такого адреса в базе нет', ],
             ['password', 'validatePassword'],
         ];
     }
-    
+
     public function attributeLabels()
     {
         return [
@@ -25,6 +29,10 @@ class LoginForm extends Model
         ];
     }
 
+    /**
+     * валидатор
+     * проверка соответствия email и пароля
+     */
     public function validatePassword($attribute, $params)
     {
         if (!$this->hasErrors()) {
@@ -34,12 +42,18 @@ class LoginForm extends Model
             }
         }
     }
-    
+
+    /**
+     * находит пользователя по email
+     *
+     * @return mixed
+     */
     public function getUser()
     {
         if ($this->_user === null) {
             $this->_user = Users::findOne(['email' => $this->email]);
         }
+
         return $this->_user;
     }
 }
