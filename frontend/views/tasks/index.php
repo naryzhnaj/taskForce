@@ -3,8 +3,8 @@
  * @var yii\web\View
  * @var ActiveForm     $form
  * @var TaskSearchForm $model
- * @var $tasks         найденные задачи
- * @var array          $all_categories список категорий
+ * @var array          $tasks найденные задачи
+ * @var array          $categories список категорий
 */
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -69,10 +69,15 @@ $this->title = 'Новые задания';
           'options' => [
             'method' => 'post',
             'class' => 'search-task__form',
-        ], ]); ?>
+          ],
+          'fieldConfig' => [
+            'options' => ['tag' => false]
+          ]
+         ]);
+      ?>
           <fieldset class="search-task__categories">
               <legend>Категории</legend>
-              <?= $form->field($model, 'categories')->checkboxList($all_categories, ['item' => $checkboxTemplateCallback])->label(false); ?>
+              <?= $form->field($model, 'categories')->checkboxList($categories, ['item' => $checkboxTemplateCallback])->label(false); ?>
           </fieldset>
           <fieldset class="search-task__categories">
               <legend>Дополнительно</legend>

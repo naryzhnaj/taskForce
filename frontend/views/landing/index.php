@@ -33,4 +33,3 @@ $this->registerJsFile('js/main.js');
 <div class="landing-bottom-container">
     <button type="button" class="button red-button">смотреть все задания</button>
 </div>
-<?= $this->renderAjax('_login', ['model' => $model]); ?>
