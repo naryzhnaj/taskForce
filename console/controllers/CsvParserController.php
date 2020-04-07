@@ -5,7 +5,6 @@ use console\models\ParseCsv;
 
 class CsvParserController extends \yii\console\Controller
 {
-    const PATH = '././src/data/';
     // список файлов для обработки
     const DATA = [
         'categories.csv',
@@ -21,8 +20,9 @@ class CsvParserController extends \yii\console\Controller
     {
         try {
             foreach (self::DATA as $file) {
-                $fh = new ParseCsv(self::PATH . $file);
-                echo 'успешно сформирован ' . $fh->csvToSQL() . "\n";
+                $path = sprintf('%s/%s', \Yii::getAlias('@csvPath'), $file);
+                $fh = new ParseCsv($path);
+                $this->stdout('успешно сформирован ' . $fh->csvToSQL() . "\n");
             }
         } catch (\Exception $e) {
             echo 'Ошибка: '.$e->getMessage();
