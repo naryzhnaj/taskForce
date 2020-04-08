@@ -18,10 +18,10 @@ class SignupForm extends Model
         return [
             ['username', 'required', 'message' => 'Введите ваше имя и фамилию'],
             [['username', 'password', 'email'], 'trim'],
-            ['city', 'exist', 'skipOnEmpty' => true, 'targetClass' => '\frontend\models\Cities', 'targetAttribute' => ['city' => 'id']],
+            ['city', 'exist', 'targetClass' => \frontend\models\Cities::class, 'targetAttribute' => ['city' => 'id']],
             [['email', 'password'], 'required', 'message' => 'Это поле необходимо заполнить'],
             ['email', 'email', 'message' => 'Введите валидный адрес электронной почты'],
-            ['email', 'unique', 'targetClass' => '\frontend\models\Users', 'message' => 'Извините, данный адрес занят'],
+            ['email', 'unique', 'targetClass' => \frontend\models\Users::class, 'message' => 'Извините, данный адрес занят'],
             ['password', 'string', 'min' => 8, 'message' => 'Длина пароля от 8 символов'],
         ];
     }

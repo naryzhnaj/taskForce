@@ -31,7 +31,7 @@ class TaskCreateForm extends Model
 
             ['files', 'file', 'maxFiles' => 0],
             ['category_id', 'required', 'message' => 'Задание должно принадлежать одной из категорий'],
-            ['category_id', 'exist', 'skipOnError' => false, 'targetClass' => '\frontend\models\Categories', 'targetAttribute' => ['category_id' => 'id']],
+            ['category_id', 'exist', 'skipOnError' => false, 'targetClass' => \frontend\models\Categories::class, 'targetAttribute' => ['category_id' => 'id']],
 
             ['budget', 'integer', 'min' => 1],
             ['end_date', 'date', 'min' => time(), 'message' => 'Выберите дату из будущего'],
@@ -56,9 +56,8 @@ class TaskCreateForm extends Model
      *
      * @param int $task id записи
      * @throws Exception
-     * @return bool
      */
-    private function upload(int $task): bool
+    private function upload(int $task): void
     {
         $this->files = UploadedFile::getInstances($this, 'files');
 
@@ -66,28 +65,23 @@ class TaskCreateForm extends Model
             foreach ($this->files as $file) {
                 $filename = sprintf('%s_%s.%s', $task, $file->baseName, $file->extension);
 
-                if (!$file->saveAs(sprintf('%s/%s', Yii::getAlias('@uploads'), $filename))) {
-                    throw new \Exception("Не удалось сохранить $file->name");
-                }
                 $new_file = new Attachment();
                 $new_file->task_id = $task;
                 $new_file->filename = $filename;
-                if (!$new_file->save()) {
-                    throw new \Exception("Не удалось сохранить $file->name в базу");
+
+                if (!$new_file->save() || !$file->saveAs(sprintf('%s/%s', Yii::getAlias('@uploads'), $filename))) {
+                    throw new \Exception("Не удалось сохранить $filename в базу");
                 }
             }
         }
-
-        return true;
     }
     
     /**
      * сохранение новой задачи
-     * 
+     *
      * @throws ServerErrorHttpException
-     * @return bool
      */
-    public function createTask()
+    public function createTask(): void
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -98,7 +92,6 @@ class TaskCreateForm extends Model
             $this->upload($task->id);
       
             $transaction->commit();
-            return true;
         } catch (\Exception $e) {
             $transaction->rollback();
             throw new \yii\web\ServerErrorHttpException("Извините, при сохранении произошла ошибка");

@@ -13,7 +13,7 @@ use yii\web\NotFoundHttpException;
 class TasksController extends \frontend\controllers\SecuredController
 {
     private const CARDS_AMOUNT = 5;
-    
+
     // закрыть исполнителям доступ к созданию заданий
     public function behaviors()
     {
@@ -34,7 +34,7 @@ class TasksController extends \frontend\controllers\SecuredController
     }
 
     /**
-     * выводит список последних задач
+     * выводит список последних задач.
      * @throws NotFoundHttpException
      * @return mixed
      */
@@ -62,9 +62,12 @@ class TasksController extends \frontend\controllers\SecuredController
     }
 
     /**
-     * показывает карточку конкретного задания
+     * показывает карточку конкретного задания.
+     *
      * @param int $id id задания
+     *
      * @throws NotFoundHttpException
+     *
      * @return mixed
      */
     public function actionShow(int $id)
@@ -84,7 +87,7 @@ class TasksController extends \frontend\controllers\SecuredController
     }
 
     /**
-     * страница с формой нового задания
+     * страница с формой нового задания.
      * @return mixed
      */
     public function actionCreate()
@@ -95,10 +98,9 @@ class TasksController extends \frontend\controllers\SecuredController
         if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post())) {
             if ($form->validate() && $form->createTask()) {
                 return $this->goHome();
-            } else {
-                return $this->refresh();
             }
         }
+
         return $this->render('create', ['categories' => $categories, 'model' => $form]);
     }
 }

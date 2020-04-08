@@ -9,7 +9,7 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 
 $this->title = 'Создать задание';
-$this->registerJsFile('js/dropzone.js');
+$this->registerJsFile('@web/js/dropzone.js', ['position' => \yii\web\VIEW::POS_HEAD]);
 ?>
 <section class="create__task">
    <h1>Публикация нового задания</h1>
@@ -91,7 +91,6 @@ $this->registerJsFile('js/dropzone.js');
          <?php endif; ?>
       </div>
    </div>
-   
 </section>
 <script>
   var dropzone = new Dropzone("div.create__file", {url: "/", paramName: "Attach"});

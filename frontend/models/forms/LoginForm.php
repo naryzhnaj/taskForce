@@ -17,7 +17,7 @@ class LoginForm extends Model
             [['email', 'password'], 'required'],
             [['email', 'password'], 'trim'],
             ['email', 'email'],
-            ['email', 'exist',  'targetClass' => '\frontend\models\Users',
+            ['email', 'exist',  'targetClass' => \frontend\models\Users::class,
                 'targetAttribute' => ['email' => 'email'], 'message' => 'Такого адреса в базе нет', ],
             ['password', 'validatePassword'],
         ];
@@ -49,7 +49,7 @@ class LoginForm extends Model
     }
 
     /**
-     * находит пользователя по email
+     * находит пользователя по email.
      *
      * @return mixed
      */
