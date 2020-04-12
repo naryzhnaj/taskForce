@@ -1,7 +1,7 @@
 <?php
 /**
- * @var ActiveForm $form
- * @var LoginForm  $model
+ * @var $form ActiveForm
+ * @var $model LoginForm
  */
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
@@ -21,7 +21,6 @@ use yii\helpers\Html;
          'fieldConfig' => [
             'template' => '{label}<br>{input}<br>{error}',
             'labelOptions' => ['class' => 'form-modal-description'],
-            'options' => ['tag' => false],
          ],
       ]);
 
