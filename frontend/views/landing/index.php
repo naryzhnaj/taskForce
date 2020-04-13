@@ -1,12 +1,13 @@
 <?php
 /**
- * @var yii\web\View $this
+ * @var $this yii\web\View
  * @var Tasks        $tasks последние задания
  */
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
 
 $this->title = 'TaskForse';
+$this->registerJsFile('@web/js/main.js', ['position' => \yii\web\VIEW::POS_END]);
 ?>
 <div class="landing-bottom-container">
     <h2>Последние задания на сайте</h2>
@@ -32,4 +33,3 @@ $this->title = 'TaskForse';
 <div class="landing-bottom-container">
     <button type="button" class="button red-button">смотреть все задания</button>
 </div>
-<?= $this->renderAjax('_login', ['model' => $model]); ?>

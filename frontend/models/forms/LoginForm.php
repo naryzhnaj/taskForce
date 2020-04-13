@@ -1,6 +1,9 @@
 <?php
-namespace frontend\models;
+
+namespace frontend\models\forms;
+
 use yii\base\Model;
+use frontend\models\Users;
 
 class LoginForm extends Model
 {
@@ -12,11 +15,14 @@ class LoginForm extends Model
     {
         return [
             [['email', 'password'], 'required'],
+            [['email', 'password'], 'trim'],
             ['email', 'email'],
+            ['email', 'exist',  'targetClass' => \frontend\models\Users::class,
+                'targetAttribute' => ['email' => 'email'], 'message' => 'Такого адреса в базе нет', ],
             ['password', 'validatePassword'],
         ];
     }
-    
+
     public function attributeLabels()
     {
         return [
@@ -25,6 +31,13 @@ class LoginForm extends Model
         ];
     }
 
+    /**
+     * встроенный валидатор
+     * проверка соответствия email и пароля.
+     *
+     * @param string $attribute проверяемый атрибут
+     * @param array  $params    дополнительные пары имя-значение
+     */
     public function validatePassword($attribute, $params)
     {
         if (!$this->hasErrors()) {
@@ -34,12 +47,18 @@ class LoginForm extends Model
             }
         }
     }
-    
+
+    /**
+     * находит пользователя по email.
+     *
+     * @return mixed
+     */
     public function getUser()
     {
         if ($this->_user === null) {
             $this->_user = Users::findOne(['email' => $this->email]);
         }
+
         return $this->_user;
     }
 }

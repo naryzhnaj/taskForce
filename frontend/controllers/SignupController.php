@@ -5,11 +5,12 @@ namespace frontend\controllers;
 use yii\filters\AccessControl;
 use frontend\models\Users;
 use frontend\models\Cities;
-use frontend\models\SignupForm;
+use frontend\models\forms\SignupForm;
 use Yii;
 
 class SignupController extends \yii\web\Controller
 {
+    // страница доступна только гостям
     public function behaviors()
     {
         return [
@@ -30,7 +31,7 @@ class SignupController extends \yii\web\Controller
 
     public function actionIndex()
     {
-        $all_cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
+        $cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
         $form = new SignupForm();
 
         if (Yii::$app->request->getIsPost()) {
@@ -42,11 +43,12 @@ class SignupController extends \yii\web\Controller
                 $user->email = $form->email;
                 $user->city_id = $form->city;
 
-                $user->save(false);             
+                $user->save(false);
+                Yii::$app->user->login($user);
                 $this->goHome();
             }
         }
 
-        return $this->render('index', ['model' => $form, 'cities' => $all_cities]);
+        return $this->render('index', ['model' => $form, 'cities' => $cities]);
     }
 }

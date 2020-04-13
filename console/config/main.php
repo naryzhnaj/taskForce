@@ -14,6 +14,7 @@ return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+        '@csvPath' => dirname(__DIR__, 2) . '/data',
     ],
     'controllerMap' => [
         'fixture' => [
