@@ -6,10 +6,8 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use frontend\assets\AppAsset;
-use frontend\models\Cities;
 
 AppAsset::register($this);
-$all_cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
 ?>
 <?php $this->beginPage(); ?>
 <!DOCTYPE html>
@@ -61,7 +59,7 @@ $all_cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
                     <a href="<?=Url::toRoute('/tasks'); ?>">Задания</a>
                 </li>
                 <li class="site-list__item">
-                    <a href="#">Исполнители</a>
+                    <a href="<?=Url::toRoute('/users'); ?>">Исполнители</a>
                 </li>
                 <li class="site-list__item">
                     <a href="<?=Url::toRoute('/tasks/create'); ?>">Создать задание</a>

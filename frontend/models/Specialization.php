@@ -60,16 +60,4 @@ class Specialization extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Categories::className(), ['id' => 'category_id']);
     }
-
-    /**
-     * проверка, является ли пользователь исполнителем
-     *
-     * @param int $id пользователя
-     *
-     * @return boolean
-     */
-    public static function isUserDoer($id)
-    {
-        return self::find()->where(['user_id' => $id])->exists();
-    }
 }

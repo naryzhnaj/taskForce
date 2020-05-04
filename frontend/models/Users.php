@@ -2,6 +2,8 @@
 
 namespace frontend\models;
 
+use yii\db\Query;
+
 /**
  * This is the model class for table "users".
  *
@@ -105,7 +107,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getAccounts()
     {
-        return $this->hasMany(Accounts::className(), ['user_id' => 'id']);
+        return $this->hasOne(Accounts::className(), ['user_id' => 'id']);
     }
 
     /**
@@ -149,11 +151,11 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return int
      */
     public function getReviewsAmount()
     {
-        return $this->hasMany(Reviews::className(), ['user_id' => 'id'])->count();
+        return $this->hasMany(Reviews::className(), ['user_id' => 'id'])->count() ?? 0;
     }
 
     /**
@@ -194,5 +196,38 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function getCity()
     {
         return $this->hasOne(Cities::className(), ['id' => 'city_id']);
+    }
+
+    /**
+     * проверка, является ли пользователь исполнителем
+     *
+     * @param int $id пользователя
+     *
+     * @return boolean
+     */
+    public static function isUserDoer($id)
+    {
+        return (new Query())->from('specialization s')->where(['s.user_id' => $id])->exists();
+    }
+
+    /**
+     * получить список всех исполнителей.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public static function getDoersList()
+    {
+        return self::find()->innerJoinWith('specialization')->distinct();
+    }
+
+    /**
+     * список отмеченных категорий.
+     *
+     * @return array
+     */
+    public function getProfessions()
+    {
+        return (new Query())->select('c.title')->from('specialization s')->where(['s.user_id' => $this->id])
+            ->innerJoin('categories c', 's.category_id=c.id')->orderBy(['c.title' => SORT_ASC])->column();
     }
 }

@@ -2,20 +2,17 @@
 
 namespace frontend\models;
 
-use Yii;
-
 /**
  * This is the model class for table "reviews".
  *
- * @property int $id
- * @property int $task_id
- * @property int $user_id
+ * @property int    $id
+ * @property int    $task_id
+ * @property int    $user_id
  * @property string $dt_add
- * @property int $value
+ * @property int    $value
  * @property string $comment
- *
- * @property Tasks $task
- * @property Users $user
+ * @property Tasks  $task
+ * @property Users  $user
  */
 class Reviews extends \yii\db\ActiveRecord
 {
@@ -66,10 +63,13 @@ class Reviews extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * подтягивает данные заказчика
+     * 
+     * @return array
      */
-    public function getUser()
+    public function getAuthor()
     {
-        return $this->hasOne(Users::className(), ['id' => 'user_id']);
+        return (new \yii\db\Query())->select('u.name')->from('tasks t')->where(['t.id' => $this->task_id])
+            ->innerJoin('users u', 'u.id=t.author_id')->scalar();
     }
 }

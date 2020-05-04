@@ -31,7 +31,7 @@ class SignupController extends \yii\web\Controller
 
     public function actionIndex()
     {
-        $cities = Cities::find()->select(['title', 'id'])->indexBy('id')->column();
+        $cities = Cities::getList();
         $form = new SignupForm();
 
         if (Yii::$app->request->getIsPost()) {
