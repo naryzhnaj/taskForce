@@ -13,14 +13,14 @@ $this->registerJsFile('@web/js/main.js', ['position' => \yii\web\VIEW::POS_END])
     <h2>Последние задания на сайте</h2>
     <?php foreach ($tasks as $task): ?>
     <div class="landing-task">
-        <div class="landing-task-top task-cargo"></div>
+        <div class="landing-task-top task-<?=$task->category->icon; ?>"></div>
         <div class="landing-task-description">
             <h3><a href="#" class="link-regular"><?=Html::encode($task->title); ?></a></h3>
             <p><?=StringHelper::truncate($task->description, 50, '...'); ?></p>
         </div>
         <div class="landing-task-info">
             <div class="task-info-left">
-                <p><a href="#" class="link-regular"><?=Html::encode($task->category->title); ?></a></p>
+                <p><a href="#" class="link-regular"><?=$task->category->title; ?></a></p>
                 <p><?= Yii::$app->formatter->asRelativeTime($task->dt_add); ?></p>
             </div>
             <?php if (isset($task->budget)):?>                
