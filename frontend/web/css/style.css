@@ -2415,7 +2415,7 @@ footer {
 .form-modal {
   background-color: #ffffff;
   position: fixed;
-  top: 100px;
+  /*top: 100px;*/
   width: 300px;
   z-index: 30;
   left: 50%;
@@ -2448,21 +2448,21 @@ footer {
   display: none; }
 
 .response-form {
-  display: none;
   width: 480px;
-  margin-left: -260px; }
-  .response-form p {
-    margin-bottom: 10px; }
+  margin-left: -260px;
+}
+.response-form p {
+  margin-bottom: 10px;
+}
 
 .completion-form {
-  width: 460px;
   margin-left: -260px;
-  display: none; }
-
+  width: 460px;
+}
 .refusal-form {
-  width: 460px;
   margin-left: -260px;
-  display: none; }
+  width: 460px;
+}
   .refusal-form p {
     background-color: #ff7675;
     padding: 20px;
