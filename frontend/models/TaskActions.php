@@ -4,7 +4,14 @@ namespace frontend\models;
 use frontend\models\Responds;
 use frontend\models\Reviews;
 use frontend\models\Users;
+use yii\web\ServerErrorHttpException;
 
+/**
+ * бизнес-логика для сущности Задание
+ *
+ * @var Tasks $model объект, над которым действия совершаются
+ * @var int $user_id ид текущего пользователя
+ */
 class TaskActions
 {
     public const STATUS_NEW = 'new';
@@ -20,12 +27,6 @@ class TaskActions
     private $model;
     private $user_id;
 
-    /**
-     * TaskActions constructor.
-     *
-     * @param ActiveRecord $data текущее задание
-     * @param int          $id   id активного пользователя
-     */
     public function __construct(Tasks $data, int $id)
     {
         $this->model = $data;
@@ -35,47 +36,44 @@ class TaskActions
     /**
      * определение роли активного пользователя по id.
      *
-     * @return string $role роль активного пользователя
+     * @return string роль активного пользователя
      */
     private function getRole()
     {
-        $role = self::VISITOR;
-
         if ($this->user_id === $this->model->author_id) {
-            $role = self::CUSTOMER;
+            return self::CUSTOMER;
         } elseif ($this->user_id === $this->model->executor_id) {
-            $role = self::EXECUTOR;
+            return self::EXECUTOR;
         }
-        return $role;
+
+        return self::VISITOR;
     }
 
     /**
-     * определение карты переходов статуса задачи в зависимости от роли, текущего статуса и действий.
+     * определение списка доступных пользователю действий.
      *
-     * @return array $res доступные действия и соответсвующие им переходы состояния
+     * @return string $res
      */
-    private function getOperations()
+    public function getActionList()
     {
-        $res = [];
+        $res = '';
         $role = $this->getRole();
-
         switch ($this->model->status) {
             case self::STATUS_PROGRESS:
-                switch ($role) {
-                    case self::EXECUTOR:
-                        $res = ['refuse' => self::STATUS_FAIL]; break;
-                    case self::CUSTOMER:
-                        $res = ['complete' => self::STATUS_COMPLETED];
-                } break;
+                if ($role === self::EXECUTOR) {
+                    $res = 'refuse';
+                } elseif ($role === self::CUSTOMER) {
+                    $res = 'complete';
+                }
+                break;
 
             case self::STATUS_NEW:
-                switch ($role) {
-                    case self::VISITOR:
-                        // откликаться может только исполнитель и только один раз
-                        $res = (Users::isUserDoer($this->user_id) && !$this->model->checkCandidate($this->user_id)) ? ['respond' => null] : []; break;
-
-                    case self::CUSTOMER:
-                        $res = ['cancel' => self::STATUS_CANCEL];
+                // откликаться может только исполнитель и только один раз
+                if ($role === self::VISITOR && Users::isUserDoer($this->user_id)
+                    && !$this->model->checkCandidate($this->user_id)) {
+                    $res = 'respond';
+                } elseif ($role === self::CUSTOMER) {
+                    $res = 'cancel';
                 }
         }
 
@@ -83,56 +81,75 @@ class TaskActions
     }
 
     /**
-     * определение списка доступных пользователю действий.
-     *
-     * @return array
-     */
-    public function getActionList()
-    {
-        return array_keys($this->getOperations()) ?? [];
-    }
-
-    /**
      * одобрить отклик.
      *
-     * @param аctiveRecord $respond
+     * @param Responds $respond
+     *
+     * @throws ServerErrorHttpException
+     *
+     * @return mixed
      */
-    public function admitRespond($respond): void
+    public function admitRespond($respond)
     {
-        $respond->status = self::STATUS_PROGRESS;
-        $respond->author->orders++;
-        $this->model->status = self::STATUS_PROGRESS;
-        $this->model->executor_id = $respond->author_id;
-        $this->model->save();
-        $respond->save();
+        if ($this->getRole() !== self::CUSTOMER) {
+            return false;
+        }
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $respond->status = self::STATUS_PROGRESS;
+            ++$respond->author->orders;
+            $this->model->status = self::STATUS_PROGRESS;
+            $this->model->executor_id = $respond->author_id;
+            $this->model->save();
+            $respond->save();
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollback();
+            throw new ServerErrorHttpException('при сохранении произошла ошибка');
+        }
     }
 
     /**
      * отклонить отклик.
      *
-     * @param аctiveRecord $respond
+     * @param Responds $respond
+     * 
+     * @return mixed
      */
-    public function refuseRespond($respond): void
+    public function refuseRespond($respond)
     {
+        if ($this->getRole() !== self::CUSTOMER) {
+            return false;
+        }
         $respond->status = self::STATUS_CANCEL;
         $respond->save();
     }
 
     /**
      *  исполнитель отказывается.
+     *
+     *  @return mixed
      */
-    public function refuse(): void
+    public function refuse()
     {
+        if ($this->getRole() !== self::EXECUTOR) {
+            return false;
+        }
         $this->model->status = self::STATUS_FAIL;
-        $this->model->executor->failures++;
+        ++$this->model->executor->failures;
         $this->model->save();
     }
 
     /**
      *  заказчик удаляет задание.
+     *
+     * @return mixed
      */
-    public function cancelTask(): void
+    public function cancelTask()
     {
+        if ($this->getRole() !== self::CUSTOMER) {
+            return false;
+        }
         $this->model->status = self::STATUS_CANCEL;
         $this->model->save();
     }
@@ -141,33 +158,55 @@ class TaskActions
      * заказчик завершает задание.
      *
      * @param array $data данные отзыва
+     *
+     * @throws ServerErrorHttpException
+     * 
+     * @return mixed
      */
-    public function complete($data): void
+    public function complete($data)
     {
-        $review = new Reviews();
-        $review->task_id = $this->model->id;
-        $review->user_id = $this->model->executor_id;
-        $review->value = $data->value;
-        $review->comment = $data->comment;
-        $review->save();
-        // конечный статус
-        if ($data->answer) {
-            $this->model->status = self::STATUS_COMPLETED;
-            $this->model->save();
-        } else $this->refuse();
+        if ($this->getRole() !== self::CUSTOMER) {
+            return false;
+        }
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $review = new Reviews();
+            $review->task_id = $this->model->id;
+            $review->user_id = $this->model->executor_id;
+            $review->value = $data->mark;
+            $review->comment = $data->comment;
+            $review->save();
+            // конечный статус
+            if ($data->answer) {
+                $this->model->status = self::STATUS_COMPLETED;
+                $this->model->save();
+            } else {
+                $this->model->status = self::STATUS_FAIL;
+                ++$this->model->executor->failures;
+                $this->model->save();
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollback();
+            throw new ServerErrorHttpException('при сохранении произошла ошибка');
+        }
     }
 
     /**
      * гость откликается.
      *
      * @param $data данные отклика
-     * @param $user_id id соискателя
+     *
+     * @return mixed
      */
-    public function respond($data, $user_id): void
+    public function respond($data)
     {
+        if ($this->getRole() !== self::VISITOR) {
+            return false;
+        }
         $respond = new Responds();
         $respond->task_id = $this->model->id;
-        $respond->author_id = $user_id;
+        $respond->author_id = $this->user_id;
         $respond->price = $data->price;
         $respond->comment = $data->comment;
         $respond->save();

@@ -8,7 +8,7 @@ class RespondForm extends Model
 {
     public $price;
     public $comment;
-    public $value;
+    public $mark;
     public $answer;
 
     public function rules()
@@ -18,7 +18,9 @@ class RespondForm extends Model
             ['comment', 'string'],
             ['comment', 'trim'],
             ['price', 'integer', 'min' => 1],
-            ['value', 'integer', 'min' => 1, 'max' => 5],
+            ['mark', 'integer', 'min' => 1, 'max' => 5],
+            ['price', 'default', 'value' => 0],
+            ['mark', 'default', 'value' => 0],
         ];
     }
 
@@ -26,7 +28,7 @@ class RespondForm extends Model
     {
         return [
             'price' => 'Ваша цена',
-            'value' => '',
+            'mark' => '',
             'comment' => 'комментарий',
         ];
     }

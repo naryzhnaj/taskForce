@@ -1,8 +1,7 @@
 <?php
 /**
- * @var yii\web\View
- * @var $user        атрибуты
- * @var $reviews     отзывы
+ * @var $this yii\web\View
+ * @var $user Users        данные исполнителя
  */
 use yii\helpers\Html;
 use frontend\widgets\RatingWidget;
@@ -36,7 +35,7 @@ $age = (new DateTime('now'))->diff(new DateTime($user->accounts->birth_date))->f
                 <div class="link-specialization">
                     <?php foreach ($user->professions as $profession): ?>
                         <a href="#" class="link-regular"><?=$profession; ?></a>
-                    <?php endforeach; ?> 
+                    <?php endforeach; ?>
                 </div>
                 <h3 class="content-view__h3">Контакты</h3>
                 <div class="user__card-link">
@@ -54,9 +53,9 @@ $age = (new DateTime('now'))->diff(new DateTime($user->accounts->birth_date))->f
         </div>
     </div>
     <div class="content-view__feedback">
-        <h2>Отзывы<span>(<?=count($reviews); ?>)</span></h2>
+        <h2>Отзывы<span>(<?=count($user->reviews); ?>)</span></h2>
         <div class="content-view__feedback-wrapper reviews-wrapper">
-            <?php foreach ($reviews as $review): ?>
+            <?php foreach ($user->reviews as $review): ?>
                 <div class="feedback-card__reviews">
                     <p class="link-task link">Задание <a href="#" class="link-regular">«<?=Html::encode($review->task->title); ?>»</a></p>
                     <div class="card__review">
@@ -70,7 +69,7 @@ $age = (new DateTime('now'))->diff(new DateTime($user->accounts->birth_date))->f
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>    
+            <?php endforeach; ?>
         </div>
     </div>
 </section>

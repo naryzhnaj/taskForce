@@ -27,13 +27,13 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
         <p>Сортировать по:</p>
         <ul class="user__search-list">
             <li class="user__search-item user__search-item--current">
-                <a href="?sort=0" class="link-regular">Рейтингу</a>
+                <a href="?sort=rating" class="link-regular">Рейтингу</a>
             </li>
             <li class="user__search-item">
-                <a href="?sort=1" class="link-regular">Числу заказов</a>
+                <a href="?sort=orders" class="link-regular">Числу заказов</a>
             </li>
             <li class="user__search-item">
-                <a href="?sort=2" class="link-regular">Популярности</a>
+                <a href="?sort=popularity" class="link-regular">Популярности</a>
             </li>
         </ul>
     </div>
@@ -86,4 +86,4 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
             ActiveForm::end();
         ?>
     </div>
-</section>    
+</section>

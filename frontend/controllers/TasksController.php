@@ -9,6 +9,7 @@ use frontend\models\Categories;
 use frontend\models\Responds;
 use frontend\models\forms\TaskSearchForm;
 use frontend\models\forms\TaskCreateForm;
+use frontend\models\forms\RespondForm;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use frontend\models\TaskActions;
@@ -71,7 +72,7 @@ class TasksController extends \frontend\controllers\SecuredController
         return $this->render('index', [
             'dataProvider' => $dataProvider,
             'categories' => $categories,
-            'model' => $form
+            'model' => $form,
         ]);
     }
 
@@ -88,27 +89,25 @@ class TasksController extends \frontend\controllers\SecuredController
     {
         $task = Tasks::findOne($id);
         if (!$task) {
-            throw new NotFoundHttpException("задание не найдено");
+            throw new NotFoundHttpException('задание не найдено');
         } elseif (   // гости могут видеть только свободные задачи
             $task->status !== Tasks::STATUS_NEW &&
             !$task->isUserCustomer() &&
             $task->executor->id !== Yii::$app->user->id) {
             throw new NotFoundHttpException('поиск исполнителей завершен');
         }
-
         // отклики может видеть только заказчик
-        $responds = ($task->isUserCustomer()) ? $task->responds : [];
+        $responds = ($task->isUserCustomer() && $task->status === Tasks::STATUS_NEW) ? $task->responds : [];
         // контактное лицо в блоке сообщений
         $user = ($task->isUserCustomer() && $task->status !== Tasks::STATUS_NEW) ? $task->executor : $task->author;
+
         // Доступные гостю действия
-        $actions = (new TaskActions($task, Yii::$app->user->id))->getActionList();
+        $action = (new TaskActions($task, Yii::$app->user->id))->getActionList();
 
         return $this->render('view', ['task' => $task,
-        'actions' => $actions,
-        'category' => Categories::findOne($task->category_id),
+        'action' => $action,
         'customer' => $user,
-        'responds' => $responds,
-        'attachments' => $task->attachments, ]);
+        'responds' => $responds, ]);
     }
 
     /**
@@ -133,38 +132,42 @@ class TasksController extends \frontend\controllers\SecuredController
      * одобрить отклик.
      *
      * @param int $id id отклика
+     *
      * @throws NotFoundHttpException
+     *
      * @return mixed
      */
     public function actionAgree(int $id)
     {
         $respond = Responds::findOne($id);
         if (!$respond) {
-            throw new NotFoundHttpException("отклик не найден");
+            throw new NotFoundHttpException('отклик не найден');
         }
         $task = new TaskActions($respond->task, Yii::$app->user->id);
         $task->admitRespond($respond);
 
-        return $this->refresh();
+        return $this->goBack();
     }
 
     /**
      * отклонить отклик.
      *
      * @param int $id id отклика
+     *
      * @throws NotFoundHttpException
+     *
      * @return mixed
      */
     public function actionIgnore(int $id)
     {
         $respond = Responds::findOne($id);
         if (!$respond) {
-            throw new NotFoundHttpException("отклик не найден");
+            throw new NotFoundHttpException('отклик не найден');
         }
         $task = new TaskActions($respond->task, Yii::$app->user->id);
         $task->refuseRespond($respond);
 
-        return $this->refresh();
+        return $this->goBack();
     }
 
     /**
@@ -176,12 +179,13 @@ class TasksController extends \frontend\controllers\SecuredController
      */
     public function actionRespond($id)
     {
-        if (Yii::$app->request->getIsPost()) {
-            $attributes = Yii::$app->request->post('RenderForm');
+        $model = new RespondForm();
+        if (Yii::$app->request->getIsPost() && $model->load(Yii::$app->request->post()) && $model->validate()) {
             $task = new TaskActions(Tasks::findOne($id), Yii::$app->user->id);
-            $task->respond($attributes, Yii::$app->user->id);
+            $task->respond($model);
         }
-        return $this->refresh();
+
+        return $this->goBack();
     }
 
     /**
@@ -193,11 +197,12 @@ class TasksController extends \frontend\controllers\SecuredController
      */
     public function actionComplete($id)
     {
-        if (Yii::$app->request->getIsPost()) {
-            $attributes = Yii::$app->request->post('RenderForm');
+        $model = new RespondForm();
+        if (Yii::$app->request->getIsPost() && $model->load(Yii::$app->request->post()) && $model->validate()) {
             $task = new TaskActions(Tasks::findOne($id), Yii::$app->user->id);
-            $task->complete($attributes);
+            $task->complete($model);
         }
+
         return $this->goHome();
     }
 

@@ -160,11 +160,11 @@ class Tasks extends \yii\db\ActiveRecord
     }
 
     /**
-     * выборка свободных заданий дляя лэндинга.
+     * выборка свободных заданий для лэндинга.
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getRecent(int $amount)
+    public static function getRecent(int $amount)
     {
         return self::find()
             ->select('category_id, title, description, budget, dt_add')
@@ -177,7 +177,7 @@ class Tasks extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getMainList()
+    public static function getMainList()
     {
         return self::find()
             ->select('tasks.id, category_id, title, description, budget, address, tasks.dt_add')
@@ -189,7 +189,7 @@ class Tasks extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getBusyDoers()
+    public static function getBusyDoers()
     {
         return self::find()->select('executor_id')->where(['status' => self::STATUS_PROGRESS]);
     }

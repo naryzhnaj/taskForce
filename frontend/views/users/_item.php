@@ -12,7 +12,7 @@ use frontend\widgets\RatingWidget;
         </div>
         <div class="feedback-card__top--name user__search-card">
             <p class="link-name">
-                <a href="<?=Url::toRoute("users/view/$model->id"); ?>" class="link-regular"><?=Html::encode($model->name); ?></a>
+                <a href="<?=Url::toRoute(['users/view', 'id' => $model->id]); ?>" class="link-regular"><?=Html::encode($model->name); ?></a>
             </p>
             <?=RatingWidget::widget(['rating' => $model->rating]); ?>
             <b><?=$model->rating; ?></b>
@@ -23,6 +23,6 @@ use frontend\widgets\RatingWidget;
     <div class="link-specialization user__search-link--bottom">
         <?php foreach ($model->professions as $profession): ?>
             <a href="#" class="link-regular"><?=$profession; ?></a>
-        <?php endforeach; ?> 
+        <?php endforeach; ?>
     </div>
 </div>

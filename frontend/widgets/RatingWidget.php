@@ -4,6 +4,9 @@ namespace frontend\widgets;
 
 /**
  * отрисовка рейтинга исполнителя звездочками.
+ *
+ * @var int MAX_RATE максимальный рейтинг
+ * @var float $rating значение для отрисовки
  */
 class RatingWidget extends \yii\base\Widget
 {

@@ -1,8 +1,8 @@
 <?php
 /**
- * @var yii\web\View
- * @var $model       RespondForm
- * @var int $task_id id задачи
+ * @var $this yii\web\View
+ * @var $model RespondForm
+ * @var $task_id int id задачи
  */
 
 use yii\helpers\Html;
@@ -16,7 +16,7 @@ use yii\helpers\Url;
 $radioTemplateCallback = function ($index, $label, $name, $checked, $value) {
     $result = ($index === 0) ? 'yes' : 'difficult';
 
-    return Html::radio($name, $checked, ['value' => $value, 'id' => $index,
+    return Html::radio($name, $checked, ['value' => 1 - $index, 'id' => $index,
         'class' => "visually-hidden completion-input completion-input--$result", ])
         .Html::label($label, $index, ['class' => "completion-label completion-label--$result"]);
 };
@@ -66,7 +66,7 @@ Modal::begin([
         </div>
     </p>
     <?php
-        echo $form->field($model, 'value')->hiddenInput(['id' => 'rating']);
+        echo $form->field($model, 'mark')->hiddenInput(['id' => 'rating']);
         echo Html::submitButton('Отправить', ['class' => 'button modal-button']);
         ActiveForm::end();
     ?>

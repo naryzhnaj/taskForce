@@ -15,20 +15,20 @@ class UsersController extends \frontend\controllers\SecuredController
 
     /**
      * выводит список новых исполнителей.
-     *
+     * @param string $sort критерий сортировки
      * @throws NotFoundHttpException
      *
      * @return mixed
      */
-    public function actionIndex($sort = 0)
+    public function actionIndex($sort = 'rating')
     {
         $form = new UserSearchForm();
-        $sort_param = ['rating', 'orders', 'popularity'][$sort];
+        $sortTypes= ['rating', 'orders', 'popularity'];
 
         // стартовый запрос - список исполнителей
         $query = Users::getDoersList();
 
-        if (!$query || !$sort_param) {
+        if (!$query || !in_array($sort, $sortTypes)) {
             throw new NotFoundHttpException('по вашему запросу ничего не найдено');
         }
 
@@ -40,7 +40,7 @@ class UsersController extends \frontend\controllers\SecuredController
         }
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => [$sort_param => SORT_DESC]],
+            'sort' => ['defaultOrder' => [$sort => SORT_DESC]],
             'pagination' => [
                 'pageSize' => self::CARDS_AMOUNT,
             ],
@@ -69,6 +69,6 @@ class UsersController extends \frontend\controllers\SecuredController
             throw new NotFoundHttpException('исполнитель не найден');
         }
 
-        return $this->render('view', ['user' => $user, 'reviews' => $user->reviews]);
+        return $this->render('view', ['user' => $user]);
     }
 }

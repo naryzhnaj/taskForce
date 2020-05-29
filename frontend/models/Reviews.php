@@ -63,13 +63,21 @@ class Reviews extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser()
+    {
+        return $this->hasOne(Users::className(), ['id' => 'user_id']);
+    }
+
+    /**
      * подтягивает данные заказчика
-     * 
+     *
      * @return array
      */
     public function getAuthor()
     {
         return (new \yii\db\Query())->select('u.name')->from('tasks t')->where(['t.id' => $this->task_id])
-            ->innerJoin('users u', 'u.id=t.author_id')->scalar();
+            ->innerJoin('users u', 'u.id=t.author_id')->one();
     }
 }

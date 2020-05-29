@@ -1,12 +1,10 @@
 <?php
 /**
- * @var yii\web\View
+ * @var $this yii\web\View
  * @var $task        атрибуты задания
- * @var $actions     доступные пользователю данные
- * @var $category    соотв.категория
+ * @var $action      доступные пользователю данные
  * @var $customer    данные заказчика
  * @var $responds    отклики
- * @var $attachments вложения
  */
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -25,25 +23,25 @@ $this->registerJsFile('@web/js/main.js');
                 <div class="content-view__headline">
                     <h1><?=Html::encode($task->title); ?></h1>
                     <span>Размещено в категории
-                        <a href="#" class="link-regular"><?=$category->title; ?></a>
+                        <a href="#" class="link-regular"><?=$task->category->title; ?></a>
                         <?=Yii::$app->formatter->asRelativeTime($task->dt_add); ?>
                     </span>
                 </div>
-                <b class="new-task__price new-task__price--<?=$category->icon; ?> content-view-price">
+                <b class="new-task__price new-task__price--<?=$task->category->icon; ?> content-view-price">
                     <?php if (isset($task->budget)):?>
                         <?=Html::encode($task->budget); ?><b> ₽</b>
                     <?php endif; ?>
                 </b>
-                <div class="new-task__icon new-task__icon--<?=$category->icon; ?> content-view-icon"></div>
+                <div class="new-task__icon new-task__icon--<?=$task->category->icon; ?> content-view-icon"></div>
             </div>
             <div class="content-view__description">
                 <h3 class="content-view__h3">Общее описание</h3>
                 <p><?=Html::encode($task->description); ?></p>
             </div>
-            <?php if (count($attachments)):?>
+            <?php if (count($task->attachments)):?>
                 <div class="content-view__attach">
                     <h3 class="content-view__h3">Вложения</h3>
-                    <?php foreach ($attachments as $attachment): ?>
+                    <?php foreach ($task->attachments as $attachment): ?>
                         <a href="<?=Url::toRoute("@frontend/uploads/$attachment"); ?>"><?=Html::encode($attachment); ?></a>
                     <?php endforeach; ?>
                 </div>
@@ -65,7 +63,7 @@ $this->registerJsFile('@web/js/main.js');
             <?php endif; ?>
         </div>
         <div class="content-view__action-buttons">
-            <?= RespondWidget::widget(['actions' => $actions, 'task_id' => $task->id]); ?>
+            <?= RespondWidget::widget(['action' => $action, 'task_id' => $task->id]); ?>
         </div>
     </div>
         <?php if (count($responds)):?>
@@ -111,7 +109,7 @@ $this->registerJsFile('@web/js/main.js');
             </div>
             <p class="info-customer"><span><?=$customer->orders; ?> отзывов</span>
                 <span class="last-"><?=Yii::$app->formatter->asRelativeTime($customer->dt_add); ?> на сайте</span></p>
-            <a href="<?=Url::toRoute("users/view/$customer->id"); ?>" class="link-regular">Смотреть профиль</a>
+            <a href="<?=Url::toRoute(['users/view', 'id' => $customer->id]); ?>" class="link-regular">Смотреть профиль</a>
         </div>
     </div>
     <div id="chat-container">
