@@ -6,7 +6,14 @@ use yii\base\Model;
 use yii\db\Query;
 
 /**
- * User search form.
+ * This is the form class for executor search.
+ *
+ * @var bool $is_free
+ * @var bool $is_online
+ * @var bool $with_reviews
+ * @var bool $is_favorite
+ * @var string $name
+ * @var array $categories
  */
 class UserSearchForm extends Model
 {
@@ -38,13 +45,15 @@ class UserSearchForm extends Model
         ];
     }
 
-    /*
-      добавляет к запросу условия в зависимости от выбранных полей
-
-     * @param ActiveRecord $query
+    /**
+     * добавляет к запросу условия в зависимости от выбранных полей
+     *
+     * @param ActiveQuery $startQuery
+     * @return ActiveQuery $query
      */
-    public function search($query)
+    public function search($startQuery)
     {
+        $query = clone($startQuery);
         $query->andFilterWhere(['like', 'name', $this->name]);
         $query->andWhere([($this->is_favorite) ? 'in' : 'not in', 'users.id',
             (new Query())->select('f.favorite_id')->from('favorites f')->where(['f.user_id' => \Yii::$app->user->id])]);
@@ -56,5 +65,6 @@ class UserSearchForm extends Model
             (new Query())->select('s.user_id')->from('specialization s')->where(['in', 'category_id', $this->categories]), ]);
         }
         $query->andWhere([($this->with_reviews) ? 'in' : 'not in', 'users.id', (new Query())->select('r.user_id')->from('reviews r')]);
+        return $query;
     }
 }

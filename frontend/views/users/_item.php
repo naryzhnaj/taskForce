@@ -16,7 +16,7 @@ use frontend\widgets\RatingWidget;
             </p>
             <?=RatingWidget::widget(['rating' => $model->rating]); ?>
             <b><?=$model->rating; ?></b>
-            <p class="user__search-content"><?=Html::encode($model->accounts->bio); ?></p>
+            <p class="user__search-content"><?=Html::encode($model->account->bio); ?></p>
         </div>
         <span class="new-task__time">Был на сайте 25 минут назад</span>
     </div>

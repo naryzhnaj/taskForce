@@ -1,7 +1,7 @@
 <?php
 /**
- * @var yii\web\View
- * @var $model       RespondForm
+ * @var yii\web\View $this
+ * @var RespondForm $model
  * @var int $task_id id задачи
  */
 use yii\helpers\Html;
@@ -15,24 +15,24 @@ Modal::begin([
         'tag' => 'button',
         'class' => 'button button__big-color response-button',
     ],
-    'bodyOptions' => ['class' => 'form-modal response-form'],
-    'closeButton' => ['class' => 'form-modal-close'],
+    'headerOptions' => [
+        'style' => 'display:none;'
+    ],
+    'bodyOptions' => ['class' => 'form-modal response-form']
 ]);
 ?>
     <h2>Отклик на задание</h2>
     <?php $form = ActiveForm::begin([
         'id' => 'respond-form',
         'enableClientValidation' => true,
+        'validateOnChange' => true,
         'validateOnSubmit' => true,
         'options' => [
             'method' => 'post',
         ],
         'action' => Url::toRoute(['tasks/respond', 'id' => $task_id]),
         'fieldConfig' => [
-            'options' => [
-                'tag' => false,
-                'template' => "{label}<br>{input}",
-        ],
+            'template' => "{label}<br>{input}<br>{error}",
             'labelOptions' => ['class' => 'form-modal-description'],
         ],
     ]); ?>
@@ -46,4 +46,5 @@ Modal::begin([
         echo Html::submitButton('Отправить', ['class' => 'button modal-button']);
         ActiveForm::end();
     ?>
+    <button class="form-modal-close" type="button">Закрыть</button>
 <?php Modal::end(); ?>

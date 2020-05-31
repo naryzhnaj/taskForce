@@ -17,7 +17,7 @@ use yii\db\Query;
  * @property int              $failures
  * @property int              $popularity
  * @property string           $dt_add
- * @property Accounts[]       $accounts
+ * @property Accounts         $account
  * @property Chats[]          $chats
  * @property Chats[]          $chats0
  * @property Favorites[]      $favorites
@@ -105,7 +105,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAccounts()
+    public function getAccount()
     {
         return $this->hasOne(Accounts::className(), ['user_id' => 'id']);
     }
@@ -221,7 +221,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
-     * список отмеченных категорий.
+     * получить список отмеченных категорий.
      *
      * @return array
      */

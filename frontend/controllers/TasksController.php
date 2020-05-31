@@ -58,7 +58,7 @@ class TasksController extends \frontend\controllers\SecuredController
         // добавляются условия из формы
         if (Yii::$app->request->getIsPost()) {
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-                $form->search($query);
+                $query = $form->search($query);
             }
         }
         $dataProvider = new ActiveDataProvider([
@@ -96,18 +96,10 @@ class TasksController extends \frontend\controllers\SecuredController
             $task->executor->id !== Yii::$app->user->id) {
             throw new NotFoundHttpException('поиск исполнителей завершен');
         }
-        // отклики может видеть только заказчик
-        $responds = ($task->isUserCustomer() && $task->status === Tasks::STATUS_NEW) ? $task->responds : [];
-        // контактное лицо в блоке сообщений
-        $user = ($task->isUserCustomer() && $task->status !== Tasks::STATUS_NEW) ? $task->executor : $task->author;
-
         // Доступные гостю действия
         $action = (new TaskActions($task, Yii::$app->user->id))->getActionList();
 
-        return $this->render('view', ['task' => $task,
-        'action' => $action,
-        'customer' => $user,
-        'responds' => $responds, ]);
+        return $this->render('view', ['task' => $task, 'action' => $action]);
     }
 
     /**
@@ -145,8 +137,7 @@ class TasksController extends \frontend\controllers\SecuredController
         }
         $task = new TaskActions($respond->task, Yii::$app->user->id);
         $task->admitRespond($respond);
-
-        return $this->goBack();
+        return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
 
     /**
@@ -166,8 +157,7 @@ class TasksController extends \frontend\controllers\SecuredController
         }
         $task = new TaskActions($respond->task, Yii::$app->user->id);
         $task->refuseRespond($respond);
-
-        return $this->goBack();
+        return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
 
     /**
@@ -184,8 +174,7 @@ class TasksController extends \frontend\controllers\SecuredController
             $task = new TaskActions(Tasks::findOne($id), Yii::$app->user->id);
             $task->respond($model);
         }
-
-        return $this->goBack();
+        return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
 
     /**

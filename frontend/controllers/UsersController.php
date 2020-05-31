@@ -23,9 +23,8 @@ class UsersController extends \frontend\controllers\SecuredController
     public function actionIndex($sort = 'rating')
     {
         $form = new UserSearchForm();
-        $sortTypes= ['rating', 'orders', 'popularity'];
+        $sortTypes = ['rating', 'orders', 'popularity'];
 
-        // стартовый запрос - список исполнителей
         $query = Users::getDoersList();
 
         if (!$query || !in_array($sort, $sortTypes)) {
@@ -35,7 +34,7 @@ class UsersController extends \frontend\controllers\SecuredController
         // добавляются условия из формы
         if (Yii::$app->request->getIsPost()) {
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-                $form->search($query);
+                $query = $form->search($query);
             }
         }
         $dataProvider = new ActiveDataProvider([

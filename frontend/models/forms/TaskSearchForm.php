@@ -5,7 +5,13 @@ namespace frontend\models\forms;
 use yii\base\Model;
 
 /**
- * Task search form.
+ * This is the form class for task search.
+ *
+ * @var string $period
+ * @var bool $without_responds
+ * @var bool $is_distant
+ * @var string $title
+ * @var array $categories
  */
 class TaskSearchForm extends Model
 {
@@ -54,12 +60,13 @@ class TaskSearchForm extends Model
     /**
      * добавляет к запросу условия в зависимости от выбранных полей
      *
-     * @param ActiveRecord $query
+     * @param ActiveQuery $startQuery
+     * @return ActiveQuery $query
      */
-    public function search($query)
+    public function search($startQuery)
     {
+        $query = clone($startQuery);
         $query->andFilterWhere(['like', 'title', $this->title]);
-
         $query->andWhere(($this->is_distant) ? 'address IS NULL' : 'address IS NOT NULL');
 
         if ($this->period != 'all') {
@@ -73,5 +80,6 @@ class TaskSearchForm extends Model
         if ($this->without_responds) {
             $query->joinWith('responds')->where('responds.task_id is NULL');
         }
+        return $query;
     }
 }

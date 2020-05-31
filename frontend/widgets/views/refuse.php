@@ -11,8 +11,10 @@ Modal::begin([
         'tag' => 'button',
         'class' => 'button button__big-color refusal-button',
     ],
-    'bodyOptions' => ['class' => 'form-modal refusal-form'],
-    'closeButton' => ['class' => 'form-modal-close'],
+    'headerOptions' => [
+        'style' => 'display:none;'
+    ],
+    'bodyOptions' => ['class' => 'form-modal refusal-form']
 ]);
 ?>
     <h2>Отказ от задания</h2>
@@ -23,4 +25,5 @@ Modal::begin([
     </p>
     <button class="button__form-modal button" id="close-modal" type="button">Отмена</button>
     <a class="button__form-modal refusal-button button" href ="<?=Url::to(['tasks/refuse', 'id' => $task_id]); ?>">Отказаться</a>
+    <button class="form-modal-close" type="button">Закрыть</button>
 <?php Modal::end(); ?>

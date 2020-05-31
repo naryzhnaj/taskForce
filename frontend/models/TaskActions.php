@@ -20,6 +20,11 @@ class TaskActions
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_FAIL = 'fail';
 
+    public const ACTION_CANCEL = 'cancel';
+    public const ACTION_COMPLETE = 'complete';
+    public const ACTION_REFUSE = 'refuse';
+    public const ACTION_RESPOND = 'respond';
+
     public const CUSTOMER = 'customer';
     public const EXECUTOR = 'executor';
     public const VISITOR = 'visitor';
@@ -42,7 +47,8 @@ class TaskActions
     {
         if ($this->user_id === $this->model->author_id) {
             return self::CUSTOMER;
-        } elseif ($this->user_id === $this->model->executor_id) {
+        }
+        if ($this->user_id === $this->model->executor_id) {
             return self::EXECUTOR;
         }
 
@@ -52,32 +58,31 @@ class TaskActions
     /**
      * определение списка доступных пользователю действий.
      *
-     * @return string $res
+     * @return string
      */
     public function getActionList()
     {
-        $res = '';
         $role = $this->getRole();
         switch ($this->model->status) {
             case self::STATUS_PROGRESS:
                 if ($role === self::EXECUTOR) {
-                    $res = 'refuse';
-                } elseif ($role === self::CUSTOMER) {
-                    $res = 'complete';
+                    return self::ACTION_REFUSE;
                 }
-                break;
+                if ($role === self::CUSTOMER) {
+                    return self::ACTION_COMPLETE;
+                }
 
             case self::STATUS_NEW:
                 // откликаться может только исполнитель и только один раз
                 if ($role === self::VISITOR && Users::isUserDoer($this->user_id)
                     && !$this->model->checkCandidate($this->user_id)) {
-                    $res = 'respond';
-                } elseif ($role === self::CUSTOMER) {
-                    $res = 'cancel';
+                    return self::ACTION_RESPOND;
+                }
+                if ($role === self::CUSTOMER) {
+                    return self::ACTION_CANCEL;
                 }
         }
-
-        return $res;
+        return '';
     }
 
     /**
@@ -113,7 +118,7 @@ class TaskActions
      * отклонить отклик.
      *
      * @param Responds $respond
-     * 
+     *
      * @return mixed
      */
     public function refuseRespond($respond)
@@ -160,7 +165,7 @@ class TaskActions
      * @param array $data данные отзыва
      *
      * @throws ServerErrorHttpException
-     * 
+     *
      * @return mixed
      */
     public function complete($data)
@@ -201,7 +206,7 @@ class TaskActions
      */
     public function respond($data)
     {
-        if ($this->getRole() !== self::VISITOR) {
+        if ($this->getRole() !== self::VISITOR || $this->model->checkCandidate($this->user_id)) {
             return false;
         }
         $respond = new Responds();

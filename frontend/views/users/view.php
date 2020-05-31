@@ -7,7 +7,7 @@ use yii\helpers\Html;
 use frontend\widgets\RatingWidget;
 
 $this->title = 'Контакты исполнителя';
-$age = (new DateTime('now'))->diff(new DateTime($user->accounts->birth_date))->format(', %y лет');
+$age = (new DateTime('now'))->diff(new DateTime($user->account->birth_date))->format(', %y лет');
 ?>
 <section class="content-view">
     <div class="user__card-wrapper">
@@ -27,7 +27,7 @@ $age = (new DateTime('now'))->diff(new DateTime($user->accounts->birth_date))->f
             </div>
         </div>
         <div class="content-view__description">
-            <p><?=Html::encode($user->accounts->bio); ?></p>
+            <p><?=Html::encode($user->account->bio); ?></p>
         </div>
         <div class="user__card-general-information">
             <div class="user__card-info">
@@ -39,9 +39,9 @@ $age = (new DateTime('now'))->diff(new DateTime($user->accounts->birth_date))->f
                 </div>
                 <h3 class="content-view__h3">Контакты</h3>
                 <div class="user__card-link">
-                    <a class="user__card-link--tel link-regular" href="#"><?=Html::encode($user->accounts->phone); ?></a>
+                    <a class="user__card-link--tel link-regular" href="#"><?=Html::encode($user->account->phone); ?></a>
                     <a class="user__card-link--email link-regular" href="mailto:<?=Html::encode($user->email); ?>"><?=Html::encode($user->email); ?></a>
-                    <a class="user__card-link--skype link-regular" href="#"><?=Html::encode($user->accounts->skype); ?></a>
+                    <a class="user__card-link--skype link-regular" href="#"><?=Html::encode($user->account->skype); ?></a>
                 </div>
             </div>
             <div class="user__card-photo">
@@ -61,7 +61,7 @@ $age = (new DateTime('now'))->diff(new DateTime($user->accounts->birth_date))->f
                     <div class="card__review">
                         <a href="#"><img src="/img/man-glasses.jpg" width="55" height="54"></a>
                         <div class="feedback-card__reviews-content">
-                            <p class="link-name link"><a href="#" class="link-regular"><?=Html::encode($review->author->name); ?></a></p>
+                            <p class="link-name link"><a href="#" class="link-regular"><?=Html::encode($review->task->author->name); ?></a></p>
                             <p class="review-text"><?=Html::encode($review->comment); ?></p>
                         </div>
                         <div class="card__review-rate">

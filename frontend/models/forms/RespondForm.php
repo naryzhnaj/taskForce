@@ -3,7 +3,14 @@
 namespace frontend\models\forms;
 
 use yii\base\Model;
-
+/**
+ * This is the form class for respond's popup.
+ *
+ * @var int $price
+ * @var int $mark
+ * @var string $comment
+ * @var bool $answer
+ */
 class RespondForm extends Model
 {
     public $price;
