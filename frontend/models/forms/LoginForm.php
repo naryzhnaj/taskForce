@@ -5,6 +5,13 @@ namespace frontend\models\forms;
 use yii\base\Model;
 use frontend\models\Users;
 
+/**
+ * This is the form class for login.
+ *
+ * @var string $email
+ * @var string $password
+ * @var Users $_user
+ */
 class LoginForm extends Model
 {
     public $email;

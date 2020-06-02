@@ -1,10 +1,8 @@
 <?php
 /**
- * @var $this yii\web\View
- * @var $task        атрибуты задания
- * @var $action      доступные пользователю данные
- * @var $customer    данные заказчика
- * @var $responds    отклики
+ * @var yii\web\View $this
+ * @var array $task        атрибуты задания
+ * @var string $action     доступное пользователю действие
  */
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -14,8 +12,9 @@ use frontend\widgets\RatingWidget;
 $this->title = 'Просмотр задания';
 $this->registerJsFile('@web/js/main.js');
 //$this->registerJsFile('@web/js/messenger.js');
+$responds = $task->visibleResponds;
+$contactPerson = $task->contact;
 ?>
-
 <section class="content-view">
     <div class="content-view__card">
         <div class="content-view__card-wrapper">
@@ -75,7 +74,7 @@ $this->registerJsFile('@web/js/main.js');
                         <div class="feedback-card__top">
                             <a href="#"><img src="/img/man-glasses.jpg" width="55" height="55"></a>
                             <div class="feedback-card__top--name">
-                                <p><a href="#" class="link-regular"><?=Html::encode($respond->author->name); ?></a></p>
+                                <p><a href="<?=Url::to(['users/view', 'id' => $respond->author->id]); ?>" class="link-regular"><?=Html::encode($respond->author->name); ?></a></p>
                                 <?=RatingWidget::widget(['rating' => $respond->author->rating]); ?>
                                 <b><?=$respond->author->rating; ?></b>
                             </div>
@@ -100,16 +99,16 @@ $this->registerJsFile('@web/js/main.js');
 <section class="connect-desk">
     <div class="connect-desk__profile-mini">
         <div class="profile-mini__wrapper">
-            <h3>Заказчик</h3>
+            <h3><?=($contactPerson->id === $task->author_id) ? 'Заказчик' : 'Исполнитель';?></h3>
             <div class="profile-mini__top">
                 <img src="/img/man-brune.jpg" width="62" height="62" alt="Аватар заказчика">
                 <div class="profile-mini__name five-stars__rate">
-                    <p><?=Html::encode($customer->name); ?></p>
+                    <p><?=Html::encode($contactPerson->name); ?></p>
                 </div>
             </div>
-            <p class="info-customer"><span><?=$customer->orders; ?> отзывов</span>
-                <span class="last-"><?=Yii::$app->formatter->asRelativeTime($customer->dt_add); ?> на сайте</span></p>
-            <a href="<?=Url::toRoute(['users/view', 'id' => $customer->id]); ?>" class="link-regular">Смотреть профиль</a>
+            <p class="info-customer"><span><?=$contactPerson->orders; ?> отзывов</span>
+                <span class="last-"><?=Yii::$app->formatter->asRelativeTime($contactPerson->dt_add); ?> на сайте</span></p>
+            <a href="<?=Url::toRoute(['users/view', 'id' => $contactPerson->id]); ?>" class="link-regular">Смотреть профиль</a>
         </div>
     </div>
     <div id="chat-container">
@@ -117,3 +116,4 @@ $this->registerJsFile('@web/js/main.js');
         <chat class="connect-desk__chat"></chat>
     </div>
 </section>
+<div class="overlay"></div>

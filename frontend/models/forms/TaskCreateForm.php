@@ -9,7 +9,15 @@ use frontend\models\Tasks;
 use frontend\models\Attachment;
 
 /**
- * Task Create form.
+ * This is the form class for creating task.
+ *
+ * @var string $title
+ * @var string $description
+ * @var int $budget
+ * @var int $category_id
+ * @var string $location
+ * @var date $end_date
+ * @var file $files
  */
 class TaskCreateForm extends Model
 {

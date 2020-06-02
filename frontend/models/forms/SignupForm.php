@@ -1,10 +1,16 @@
 <?php
+
 namespace frontend\models\forms;
 
 use yii\base\Model;
 
 /**
- * Signup form
+ * This is the form class for signup.
+ *
+ * @var string $email
+ * @var string $password
+ * @var string $username
+ * @var int $city
  */
 class SignupForm extends Model
 {

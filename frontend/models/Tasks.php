@@ -107,11 +107,12 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getResponds()
     {
-        return $this->hasMany(Responds::className(), ['task_id' => 'id'])->where(['status' => self::STATUS_NEW]);
+        return $this->hasMany(Responds::className(), ['task_id' => 'id']);
     }
 
     /**
-     * проверка наличия отклика
+     * проверка наличия отклика.
+     *
      * @return bool
      */
     public function checkCandidate($user_id)
@@ -201,6 +202,27 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function isUserCustomer()
     {
-        return ($this->author->id === \Yii::$app->user->id);
+        return $this->author_id === \Yii::$app->user->id;
+    }
+
+    /**
+     * получить список видимых пользователю откликов.
+     *
+     * @return array
+     */
+    public function getVisibleResponds()
+    {
+        return ($this->isUserCustomer() && $this->status === self::STATUS_NEW) ?
+            $this->hasMany(Responds::className(), ['task_id' => 'id'])->where(['responds.status' => self::STATUS_NEW]) : [];
+    }
+
+    /**
+     * контактное лицо в блоке сообщений на стр.просмотра.
+     *
+     * @return Users
+     */
+    public function getContact()
+    {
+        return ($this->isUserCustomer() && $this->status !== self::STATUS_NEW) ? $this->executor : $this->author;
     }
 }

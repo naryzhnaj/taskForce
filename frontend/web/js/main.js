@@ -14,7 +14,7 @@ for (var i = 0; i < openModalLinks.length; i++) {
 }
 
 function closeModal(event) {
-  var modal = event.currentTarget.parentElement;
+  var modal = document.getElementsByClassName("fade modal in")[0];
   var overlay = document.getElementsByClassName("overlay")[0];
   modal.removeAttribute("style");
   overlay.removeAttribute("style");
@@ -26,7 +26,10 @@ for (var j = 0; j < closeModalLinks.length; j++) {
   closeModalLink.addEventListener("click", closeModal)
 }
 
-// document.getElementById('close-modal').addEventListener("click", closeModal);
+var closeButton = document.getElementById('close-modal');
+if (closeButton) {
+  closeButton.addEventListener("click", closeModal);
+}
 
 var starRating = document.getElementsByClassName("completion-form-star");
 

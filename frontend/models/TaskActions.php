@@ -107,6 +107,7 @@ class TaskActions
             $this->model->executor_id = $respond->author_id;
             $this->model->save();
             $respond->save();
+            $respond->author->save();
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollback();
@@ -140,8 +141,15 @@ class TaskActions
         if ($this->getRole() !== self::EXECUTOR) {
             return false;
         }
+        $this->fail();
+    }
+
+    /** поменять статус задания на проваленное */
+    private function fail(): void
+    {
         $this->model->status = self::STATUS_FAIL;
         ++$this->model->executor->failures;
+        $this->model->executor->save();
         $this->model->save();
     }
 
@@ -181,14 +189,12 @@ class TaskActions
             $review->value = $data->mark;
             $review->comment = $data->comment;
             $review->save();
-            // конечный статус
+            // проверка успешности
             if ($data->answer) {
                 $this->model->status = self::STATUS_COMPLETED;
                 $this->model->save();
             } else {
-                $this->model->status = self::STATUS_FAIL;
-                ++$this->model->executor->failures;
-                $this->model->save();
+                $this->fail();
             }
             $transaction->commit();
         } catch (\Exception $e) {
