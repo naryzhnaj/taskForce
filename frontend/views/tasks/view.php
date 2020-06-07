@@ -1,7 +1,7 @@
 <?php
 /**
  * @var yii\web\View $this
- * @var array $task        атрибуты задания
+ * @var Tasks $task        атрибуты задания
  * @var string $action     доступное пользователю действие
  */
 use yii\helpers\Html;
@@ -10,7 +10,7 @@ use frontend\widgets\RespondWidget;
 use frontend\widgets\RatingWidget;
 
 $this->title = 'Просмотр задания';
-$this->registerJsFile('@web/js/main.js');
+$this->registerJsFile('@web/js/actionForms.js');
 //$this->registerJsFile('@web/js/messenger.js');
 $responds = $task->visibleResponds;
 $contactPerson = $task->contact;
@@ -116,4 +116,3 @@ $contactPerson = $task->contact;
         <chat class="connect-desk__chat"></chat>
     </div>
 </section>
-<div class="overlay"></div>

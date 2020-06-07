@@ -112,12 +112,13 @@ class Tasks extends \yii\db\ActiveRecord
 
     /**
      * проверка наличия отклика.
+     * @param int $id id гостя
      *
      * @return bool
      */
-    public function checkCandidate($user_id)
+    public function checkCandidate($id)
     {
-        return $this->hasMany(Responds::className(), ['task_id' => 'id'])->where(['responds.author_id' => $user_id])->exists();
+        return $this->hasMany(Responds::className(), ['task_id' => 'id'])->where(['responds.author_id' => $id])->exists();
     }
 
     /**

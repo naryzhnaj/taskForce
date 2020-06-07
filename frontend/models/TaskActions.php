@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\models;
 
 use frontend\models\Responds;
@@ -7,10 +8,10 @@ use frontend\models\Users;
 use yii\web\ServerErrorHttpException;
 
 /**
- * бизнес-логика для сущности Задание
+ * бизнес-логика для сущности Задание.
  *
  * @var Tasks $model объект, над которым действия совершаются
- * @var int $user_id ид текущего пользователя
+ * @var int   $user_id ид текущего пользователя
  */
 class TaskActions
 {
@@ -43,7 +44,7 @@ class TaskActions
      *
      * @return string роль активного пользователя
      */
-    private function getRole()
+    private function getRole(): string
     {
         if ($this->user_id === $this->model->author_id) {
             return self::CUSTOMER;
@@ -56,11 +57,11 @@ class TaskActions
     }
 
     /**
-     * определение списка доступных пользователю действий.
+     * определение доступного пользователю действия.
      *
      * @return string
      */
-    public function getActionList()
+    public function getActionList(): string
     {
         $role = $this->getRole();
         switch ($this->model->status) {
@@ -71,7 +72,7 @@ class TaskActions
                 if ($role === self::CUSTOMER) {
                     return self::ACTION_COMPLETE;
                 }
-
+            break;
             case self::STATUS_NEW:
                 // откликаться может только исполнитель и только один раз
                 if ($role === self::VISITOR && Users::isUserDoer($this->user_id)
@@ -82,6 +83,7 @@ class TaskActions
                     return self::ACTION_CANCEL;
                 }
         }
+
         return '';
     }
 
@@ -94,9 +96,9 @@ class TaskActions
      *
      * @return mixed
      */
-    public function admitRespond($respond)
+    public function admitRespond(Responds $respond)
     {
-        if ($this->getRole() !== self::CUSTOMER) {
+        if ($this->getRole() !== self::CUSTOMER || $this->model->status !== self::STATUS_NEW) {
             return false;
         }
         $transaction = \Yii::$app->db->beginTransaction();
@@ -105,9 +107,10 @@ class TaskActions
             ++$respond->author->orders;
             $this->model->status = self::STATUS_PROGRESS;
             $this->model->executor_id = $respond->author_id;
-            $this->model->save();
-            $respond->save();
-            $respond->author->save();
+
+            if (!$this->model->save(false) || !$respond->save(false) || !$respond->author->save(false)) {
+                throw new \Exception('Не удалось сохранить');
+            }
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollback();
@@ -122,13 +125,13 @@ class TaskActions
      *
      * @return mixed
      */
-    public function refuseRespond($respond)
+    public function refuseRespond(Responds $respond)
     {
-        if ($this->getRole() !== self::CUSTOMER) {
+        if ($this->getRole() !== self::CUSTOMER || $respond->status !== self::STATUS_NEW) {
             return false;
         }
         $respond->status = self::STATUS_CANCEL;
-        $respond->save();
+        $respond->save(false);
     }
 
     /**
@@ -138,33 +141,39 @@ class TaskActions
      */
     public function refuse()
     {
-        if ($this->getRole() !== self::EXECUTOR) {
+        if ($this->getRole() !== self::EXECUTOR || $this->model->status !== self::STATUS_PROGRESS) {
             return false;
         }
         $this->fail();
     }
 
-    /** поменять статус задания на проваленное */
-    private function fail(): void
+    /**
+     * поменять статус задания на проваленное
+     * 
+     * @throws ServerErrorHttpException
+     */
+    private function fail()
     {
         $this->model->status = self::STATUS_FAIL;
         ++$this->model->executor->failures;
-        $this->model->executor->save();
-        $this->model->save();
+
+        if (!$this->model->executor->save(false) || !$this->model->save(false)) {
+            throw new ServerErrorHttpException('при сохранении произошла ошибка');
+        }
     }
 
     /**
-     *  заказчик удаляет задание.
+     * заказчик удаляет задание.
      *
      * @return mixed
      */
     public function cancelTask()
     {
-        if ($this->getRole() !== self::CUSTOMER) {
+        if ($this->getRole() !== self::CUSTOMER || $this->model->status !== self::STATUS_NEW) {
             return false;
         }
         $this->model->status = self::STATUS_CANCEL;
-        $this->model->save();
+        $this->model->save(false);
     }
 
     /**
@@ -178,7 +187,7 @@ class TaskActions
      */
     public function complete($data)
     {
-        if ($this->getRole() !== self::CUSTOMER) {
+        if ($this->getRole() !== self::CUSTOMER || $this->model->status !== self::STATUS_PROGRESS) {
             return false;
         }
         $transaction = \Yii::$app->db->beginTransaction();
@@ -189,10 +198,11 @@ class TaskActions
             $review->value = $data->mark;
             $review->comment = $data->comment;
             $review->save();
+            $this->model->executor->countRating();
             // проверка успешности
             if ($data->answer) {
                 $this->model->status = self::STATUS_COMPLETED;
-                $this->model->save();
+                $this->model->save(false);
             } else {
                 $this->fail();
             }
@@ -212,7 +222,7 @@ class TaskActions
      */
     public function respond($data)
     {
-        if ($this->getRole() !== self::VISITOR || $this->model->checkCandidate($this->user_id)) {
+        if ($this->getRole() !== self::VISITOR || $this->model->status !== self::STATUS_NEW || $this->model->checkCandidate($this->user_id)) {
             return false;
         }
         $respond = new Responds();

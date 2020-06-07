@@ -13,7 +13,7 @@ use yii\db\Query;
  * @var bool $with_reviews
  * @var bool $is_favorite
  * @var string $name
- * @var array $categories
+ * @var int[] $categories
  */
 class UserSearchForm extends Model
 {
@@ -53,7 +53,7 @@ class UserSearchForm extends Model
      */
     public function search($startQuery)
     {
-        $query = clone($startQuery);
+        $query = clone $startQuery;
         $query->andFilterWhere(['like', 'name', $this->name]);
         $query->andWhere([($this->is_favorite) ? 'in' : 'not in', 'users.id',
             (new Query())->select('f.favorite_id')->from('favorites f')->where(['f.user_id' => \Yii::$app->user->id])]);

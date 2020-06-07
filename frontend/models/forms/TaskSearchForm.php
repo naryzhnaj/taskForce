@@ -11,7 +11,7 @@ use yii\base\Model;
  * @var bool $without_responds
  * @var bool $is_distant
  * @var string $title
- * @var array $categories
+ * @var int[] $categories
  */
 class TaskSearchForm extends Model
 {
@@ -65,7 +65,7 @@ class TaskSearchForm extends Model
      */
     public function search($startQuery)
     {
-        $query = clone($startQuery);
+        $query = clone $startQuery;
         $query->andFilterWhere(['like', 'title', $this->title]);
         $query->andWhere(($this->is_distant) ? 'address IS NULL' : 'address IS NOT NULL');
 

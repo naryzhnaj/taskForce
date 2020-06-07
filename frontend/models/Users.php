@@ -151,6 +151,8 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
+     * подсчет кол-ва отзывов.
+     *
      * @return int
      */
     public function getReviewsAmount()
@@ -230,4 +232,15 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return (new Query())->select('c.title')->from('specialization s')->where(['s.user_id' => $this->id])
             ->innerJoin('categories c', 's.category_id=c.id')->orderBy(['c.title' => SORT_ASC])->column();
     }
+
+    /**
+     * пересчет рейтинга
+     *
+     * @return void
+     */
+    public function countRating()
+    {
+        $sumMarks = $this->hasMany(Reviews::className(), ['user_id' => 'id'])->sum('value');
+        $this->rating = $sumMarks/$this->reviewsAmount;
+        $this->save();}
 }

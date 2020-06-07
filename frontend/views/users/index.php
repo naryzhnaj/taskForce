@@ -1,15 +1,15 @@
 <?php
 /**
- * @var yii\web\View
- * @var ActiveForm     $form
- * @var UserSearchForm $model
+ * @var yii\web\View       $this
+ * @var ActiveForm         $form
+ * @var UserSearchForm     $model
  * @var ActiveDataProvider $dataProvider
- * @var array          $categories список категорий
+ * @var array              $categories список категорий
  */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\ListView;
-
+use yii\helpers\Url;
 $this->title = 'Исполнители';
 
 /**
@@ -26,14 +26,14 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
     <div class="user__search-link">
         <p>Сортировать по:</p>
         <ul class="user__search-list">
-            <li class="user__search-item user__search-item--current">
-                <a href="?sort=rating" class="link-regular">Рейтингу</a>
+            <li class="user__search-item">
+                <a href="<?=Url::toRoute(['', 'sort' => 'rating']); ?>" class="link-regular">Рейтингу</a>
             </li>
             <li class="user__search-item">
-                <a href="?sort=orders" class="link-regular">Числу заказов</a>
+                <a href="<?=Url::toRoute(['', 'sort' => 'orders']); ?>" class="link-regular">Числу заказов</a>
             </li>
             <li class="user__search-item">
-                <a href="?sort=popularity" class="link-regular">Популярности</a>
+                <a href="<?=Url::toRoute(['', 'sort' => 'popularity']); ?>" class="link-regular">Популярности</a>
             </li>
         </ul>
     </div>
@@ -56,7 +56,7 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
                 'class' => 'search-task__form',
             ],
             'fieldConfig' => [
-                'options' => ['tag' => false]
+                'options' => ['tag' => false],
             ],
         ]); ?>
 
