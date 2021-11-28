@@ -15,16 +15,17 @@ class UsersController extends \frontend\controllers\SecuredController
 
     /**
      * выводит список новых исполнителей.
+     *
      * @param string $sort критерий сортировки
+     *
      * @throws NotFoundHttpException
      *
      * @return mixed
      */
-    public function actionIndex($sort = 'rating')
+    public function actionIndex(string $sort='rating')
     {
         $form = new UserSearchForm();
         $sortTypes = ['rating', 'orders', 'popularity'];
-
         $query = Users::getDoersList();
 
         if (!$query || !in_array($sort, $sortTypes)) {
@@ -43,8 +44,8 @@ class UsersController extends \frontend\controllers\SecuredController
             'pagination' => [
                 'pageSize' => self::CARDS_AMOUNT,
             ],
-        ]);
-
+        ]);         
+        
         return $this->render('index', [
             'dataProvider' => $dataProvider,
             'categories' => Categories::getList(),

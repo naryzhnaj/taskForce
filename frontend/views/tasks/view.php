@@ -1,8 +1,8 @@
 <?php
 /**
- * @var yii\web\View $this
- * @var Tasks $task        атрибуты задания
- * @var string $action     доступное пользователю действие
+ * @var $this yii\web\View 
+ * @var $task Tasks атрибуты задания
+ * @var $action string доступное пользователю действие
  */
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -10,9 +10,8 @@ use frontend\widgets\RespondWidget;
 use frontend\widgets\RatingWidget;
 
 $this->title = 'Просмотр задания';
-$this->registerJsFile('@web/js/actionForms.js');
-//$this->registerJsFile('@web/js/messenger.js');
-$responds = $task->visibleResponds;
+$this->registerJsFile('@web/js/main.js');
+$responds = $task->getVisibleResponds();
 $contactPerson = $task->contact;
 ?>
 <section class="content-view">
@@ -53,8 +52,8 @@ $contactPerson = $task->contact;
                         <a href="#"><img src="/img/map.jpg" width="361" height="292" alt="Москва, Новый арбат, 23 к. 1"></a>
                     </div>
                     <div class="content-view__address">
-                        <span class="address__town">Москва</span><br>
-                        <span>Новый арбат, 23 к. 1</span>
+                        <span class="address__town"><?=$task->city->title; ?></span><br>
+                        <span><?=Html::encode($task->address); ?></span>
                         <p>Вход под арку, код домофона 1122</p>
                     </div>
                 </div>
@@ -106,9 +105,13 @@ $contactPerson = $task->contact;
                     <p><?=Html::encode($contactPerson->name); ?></p>
                 </div>
             </div>
-            <p class="info-customer"><span><?=$contactPerson->orders; ?> отзывов</span>
-                <span class="last-"><?=Yii::$app->formatter->asRelativeTime($contactPerson->dt_add); ?> на сайте</span></p>
-            <a href="<?=Url::toRoute(['users/view', 'id' => $contactPerson->id]); ?>" class="link-regular">Смотреть профиль</a>
+            <?php if ($contactPerson->id === $task->executor_id):?>         
+                <p class="info-customer">
+                    <span><?=$contactPerson->orders; ?> отзывов</span>
+                    <span><?=Yii::$app->formatter->asRelativeTime($contactPerson->dt_add); ?> на сайте</span>
+                </p>
+                <a href="<?=Url::toRoute(['users/view', 'id' => $contactPerson->id]); ?>" class="link-regular">Смотреть профиль</a>
+            <?php endif; ?>
         </div>
     </div>
     <div id="chat-container">

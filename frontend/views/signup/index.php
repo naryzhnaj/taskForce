@@ -1,9 +1,9 @@
 <?php
 /**
- * @var yii\web\View
- * @var ActiveForm   $form
- * @var SignupForm   $model
- * @var Cities       $cities
+ * @var $this yii\web\View
+ * @var $form ActiveForm
+ * @var $model SignupForm
+ * @var $cities Cities
  */
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
@@ -16,17 +16,14 @@ $this->title = 'Регистрация';
    <?php
       $form = ActiveForm::begin([
          'id' => 'signup',
-         'enableClientValidation' => true,
-         'validateOnSubmit' => true,
          'validateOnChange' => true,
          'options' => [
             'method' => 'post',
             'class' => 'registration__user-form form-create',
          ],
          'fieldConfig' => [
-            'template' => '{label}{input}{hint}{error}',
-            'options' => ['tag' => false]
-         ],
+            'template' => '{label}<br>{input}<br>{hint}<br>{error}'
+         ]
       ]);
 
       echo $form->field($model, 'email')->textarea(['class' => 'input textarea', 'rows' => 1, 'placeholder' => 'kumarm@mail.ru']);
@@ -35,8 +32,7 @@ $this->title = 'Регистрация';
         ->dropDownList($cities, ['class' => 'multiple-select input town-select registration-town'])
         ->hint('Укажите город, чтобы находить подходящие задачи');
 
-      echo $form->field($model, 'password')->passwordInput(['class' => 'input textarea']);
-
+      echo $form->field($model, 'password')->passwordInput(['class' => 'input textarea', 'labelOptions' => ['class' =>"input-danger"]]);   
       echo Html::submitButton('Cоздать аккаунт', ['class' => 'button button__registration']);
       ActiveForm::end();
    ?>

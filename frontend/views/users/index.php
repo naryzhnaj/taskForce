@@ -1,26 +1,27 @@
 <?php
 /**
- * @var yii\web\View       $this
- * @var ActiveForm         $form
- * @var UserSearchForm     $model
- * @var ActiveDataProvider $dataProvider
- * @var array              $categories список категорий
+ * @var $this yii\web\View
+ * @var $form ActiveForm
+ * @var $model UserSearchForm
+ * @var $dataProvider ActiveDataProvider
+ * @var $categories array список категорий
  */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\ListView;
 use yii\helpers\Url;
+
 $this->title = 'Исполнители';
 
 /**
  * шаблон для отрисовки чекбоксов.
  */
 $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): string {
-    return '<div class="form-group">'
-        .Html::checkbox($name, $checked, ['value' => $value, 'id' => $index, 'class' => 'visually-hidden checkbox__input'])
-        .Html::label($label, $index).'</div>';
-};
-
+    return   "<label class='checkbox__legend'>
+    <input class='visually-hidden checkbox__input' type='checkbox' {$checked} name='{$name}' value='{$value}'>
+    <span>{$label}</span>
+    </label>";
+}
 ?>
 <section class="user__search">
     <div class="user__search-link">
@@ -48,16 +49,10 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
     <div class="search-task__wrapper">
         <?php $form = ActiveForm::begin([
             'id' => 'search-user',
-            'enableClientValidation' => true,
-            'validateOnSubmit' => true,
-            'validateOnChange' => true,
             'options' => [
                 'method' => 'post',
                 'class' => 'search-task__form',
-            ],
-            'fieldConfig' => [
-                'options' => ['tag' => false],
-            ],
+            ]
         ]); ?>
 
         <fieldset class="search-task__categories">
@@ -68,14 +63,10 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
         <fieldset class="search-task__categories">
             <legend>Дополнительно</legend>
             <?php
-                echo $form->field($model, 'is_free', ['template' => '{input}{label}'])->
-                   checkbox(['class' => 'visually-hidden checkbox__input'], false);
-                echo $form->field($model, 'is_online', ['template' => '{input}{label}'])->
-                   checkbox(['class' => 'visually-hidden checkbox__input'], false);
-                echo $form->field($model, 'with_reviews', ['template' => '{input}{label}'])->
-                    checkbox(['class' => 'visually-hidden checkbox__input'], false);
-                echo $form->field($model, 'is_favorite', ['template' => '{input}{label}'])->
-                    checkbox(['class' => 'visually-hidden checkbox__input'], false);
+            echo $form->field($model, 'is_free', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
+            echo $form->field($model, 'is_online', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
+            echo $form->field($model, 'with_reviews', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
+            echo $form->field($model, 'is_favorite', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
             ?>
         </fieldset>
         <?php

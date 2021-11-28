@@ -4,6 +4,7 @@ namespace frontend\models\forms;
 
 use yii\base\Model;
 use yii\db\Query;
+use frontend\models\Tasks;
 
 /**
  * This is the form class for executor search.
@@ -55,16 +56,21 @@ class UserSearchForm extends Model
     {
         $query = clone $startQuery;
         $query->andFilterWhere(['like', 'name', $this->name]);
-        $query->andWhere([($this->is_favorite) ? 'in' : 'not in', 'users.id',
-            (new Query())->select('f.favorite_id')->from('favorites f')->where(['f.user_id' => \Yii::$app->user->id])]);
-
-        $query->andWhere([($this->is_free) ? 'not in' : 'in', 'users.id', \frontend\models\Tasks::getBusyDoers()]);
-
-        if ($this->categories) {
-            $query->andWhere(['in', 'users.id',
-            (new Query())->select('s.user_id')->from('specialization s')->where(['in', 'category_id', $this->categories]), ]);
+        
+        if ($this->is_favorite) {
+            $query->andWhere(['id' => \Yii::$app->user->identity->favoriteList]);
         }
-        $query->andWhere([($this->with_reviews) ? 'in' : 'not in', 'users.id', (new Query())->select('r.user_id')->from('reviews r')]);
+        if ($this->is_free) {
+            $query->andWhere(['id' => Tasks::getFreeDoers()]);
+        }
+        if (count($this->categories)) {
+            $query->andWhere(['id' =>
+            (new Query())->select('user_id AS id')->from('specialization')->where(['in', 'category_id', $this->categories])]);
+        }
+        if ($this->with_reviews) {
+            $query->andWhere(['id' => (new Query())->select('user_id AS id')->from('reviews')]);
+        }
+        
         return $query;
     }
 }

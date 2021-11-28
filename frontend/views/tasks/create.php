@@ -1,9 +1,9 @@
 <?php
 /**
- * @var yii\web\View
- * @var ActiveForm     $form
- * @var TaskCreateForm $model
- * @var array          $categories список категорий
+ * @var $this yii\web\View
+ * @var $form ActiveForm
+ * @var $model TaskCreateForm
+ * @var $categories array список категорий
  */
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
@@ -24,7 +24,7 @@ $this->registerJsFile('@web/js/dropzone.js', ['position' => \yii\web\VIEW::POS_H
                'enctype' => 'multipart/form-data',
             ],
             'fieldConfig' => [
-               'options' => ['tag' => false],
+               'template' => '{label}<br>{input}<br>{hint}<br>{error}'
             ],
          ]);
 
@@ -39,7 +39,7 @@ $this->registerJsFile('@web/js/dropzone.js', ['position' => \yii\web\VIEW::POS_H
          echo $form->field($model, 'category_id')->dropDownList($categories,
              ['class' => 'multiple-select input multiple-select-big'])->hint('Выберите категорию', ['tag' => 'span']);
       ?>
-     <label>Файлы</label> 
+      <label>Файлы</label> 
       <span>Загрузите файлы, которые помогут исполнителю лучше выполнить или оценить работу</span>
       <div class="create__file">
          <span>Добавить новый файл</span>
@@ -47,7 +47,7 @@ $this->registerJsFile('@web/js/dropzone.js', ['position' => \yii\web\VIEW::POS_H
       </div>
             
       <?= $form->field($model, 'location')->
-         input('search', ['class' => 'input-middle input input-navigation', 'rows' => 1,
+         input('search', ['class' => 'input-middle input input-navigation',
          'placeholder' => 'Санкт-Петербург, Калининский район', ])
          ->hint('Укажите адрес исполнения, если задание требует присутствия', ['tag' => 'span']); ?>
 
@@ -59,7 +59,7 @@ $this->registerJsFile('@web/js/dropzone.js', ['position' => \yii\web\VIEW::POS_H
          </div>
          <div class="create__price-time--wrapper">
             <?= $form->field($model, 'end_date')->
-               input('date', ['class' => 'input-middle input input-date', 'rows' => 1, 'placeholder' => '10.11, 15:00'])
+               input('date', ['class' => 'input-middle input input-date', 'placeholder' => '10.11, 15:00'])
                ->hint('Укажите крайний срок исполнения', ['tag' => 'span']); ?>
          </div>
       </div>

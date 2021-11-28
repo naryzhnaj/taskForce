@@ -1,8 +1,8 @@
 <?php
 /**
- * @var yii\web\View $this
- * @var RespondForm $model
- * @var int $task_id id задачи
+ * @var $this yii\web\View
+ * @var $model RespondForm
+ * @var $task_id int id задачи
  */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -46,5 +46,5 @@ Modal::begin([
         echo Html::submitButton('Отправить', ['class' => 'button modal-button']);
         ActiveForm::end();
     ?>
-    <button class="form-modal-close" type="button">Закрыть</button>
+    <button class="form-modal-close" type="button" data-dismiss="modal">Закрыть</button>
 <?php Modal::end(); ?>

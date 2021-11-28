@@ -1,10 +1,10 @@
 <?php
 /**
- * @var yii\web\View
- * @var ActiveForm     $form
- * @var TaskSearchForm $model
- * @var ActiveDataProvider $dataProvider
- * @var array          $categories список категорий
+ * @var $this yii\web\View
+ * @var $form ActiveForm         
+ * @var $model TaskSearchForm     
+ * @var $dataProvider ActiveDataProvider 
+ * @var $categories array список категорий
  */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -14,11 +14,11 @@ use yii\widgets\ListView;
  * шаблон для отрисовки чекбоксов.
  */
 $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value) {
-    return '<div class="form-group">'
-        .Html::checkbox($name, $checked, ['value' => $value, 'id' => $index, 'class' => 'visually-hidden checkbox__input'])
-        .Html::label($label, $index).'</div>';
+    return  "<label class='checkbox__legend'>
+    <input class='visually-hidden checkbox__input' type='checkbox' {$checked} name='{$name}' value='{$value}'>
+    <span>{$label}</span>
+    </label>";
 };
-
 $this->title = 'Новые задания';
 ?>
 <section class="new-task">
@@ -36,16 +36,10 @@ $this->title = 'Новые задания';
     <div class="search-task__wrapper">
         <?php $form = ActiveForm::begin([
             'id' => 'search-task',
-            'enableClientValidation' => true,
-            'validateOnSubmit' => true,
-            'validateOnChange' => true,
             'options' => [
             'method' => 'post',
             'class' => 'search-task__form',
-            ],
-            'fieldConfig' => [
-                'options' => ['tag' => false],
-            ],
+            ]
         ]); ?>
         <fieldset class="search-task__categories">
             <legend>Категории</legend>
@@ -54,10 +48,8 @@ $this->title = 'Новые задания';
         <fieldset class="search-task__categories">
             <legend>Дополнительно</legend>
             <?php
-                echo $form->field($model, 'without_responds', ['template' => '{input}{label}{error}'])->
-                    checkbox(['class' => 'visually-hidden checkbox__input'], false);
-                echo $form->field($model, 'is_distant', ['template' => '{input}{label}{error}'])->
-                    checkbox(['class' => 'visually-hidden checkbox__input'], false);
+            echo $form->field($model, 'without_responds', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
+            echo $form->field($model, 'is_distant', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
             ?>
         </fieldset>
         <?php
@@ -68,6 +60,7 @@ $this->title = 'Новые задания';
                 'month' => 'За месяц', ],
                 ['class' => 'multiple-select input'])
                 ->label('Период', ['class' => 'search-task__name']);
+
             echo $form->field($model, 'title')->input('search', ['class' => 'input-middle input'])
                 ->label('Поиск по названию', ['class' => 'search-task__name']);
 

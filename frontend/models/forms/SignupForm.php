@@ -3,6 +3,8 @@
 namespace frontend\models\forms;
 
 use yii\base\Model;
+use frontend\models\Users;
+use Yii;
 
 /**
  * This is the form class for signup.
@@ -40,5 +42,29 @@ class SignupForm extends Model
             'email' => 'электронная почта',
             'password' => 'пароль',
         ];
+    }
+
+    /**
+     * сохранение нового пользователя
+     *
+     * @throws ServerErrorHttpException
+     */
+    public function createUser(): void
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $user = new Users();
+            $user->password = Yii::$app->security->generatePasswordHash($form->password);
+            $user->name = $form->username;
+            $user->email = $form->email;
+            $user->city_id = $form->city;
+            $user->save(false);
+            Yii::$app->user->login($user);
+
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollback();
+            throw new \yii\web\ServerErrorHttpException("Извините, при сохранении произошла ошибка");
+        }
     }
 }

@@ -2,15 +2,12 @@
 
 namespace frontend\models;
 
-use frontend\models\Responds;
-use frontend\models\Reviews;
-use frontend\models\Users;
 use yii\web\ServerErrorHttpException;
 
 /**
  * бизнес-логика для сущности Задание.
  *
- * @var Tasks $model объект, над которым действия совершаются
+ * @var Tasks объект, над которым действия совершаются
  * @var int   $user_id ид текущего пользователя
  */
 class TaskActions
@@ -148,8 +145,8 @@ class TaskActions
     }
 
     /**
-     * поменять статус задания на проваленное
-     * 
+     * поменять статус задания на проваленное.
+     *
      * @throws ServerErrorHttpException
      */
     private function fail()

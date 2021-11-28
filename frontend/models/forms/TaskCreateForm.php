@@ -40,9 +40,7 @@ class TaskCreateForm extends Model
             ['files', 'file', 'maxFiles' => 0],
             ['category_id', 'required', 'message' => 'Задание должно принадлежать одной из категорий'],
             ['category_id', 'exist', 'skipOnError' => false, 'targetClass' => \frontend\models\Categories::class, 'targetAttribute' => ['category_id' => 'id']],
-
-            ['budget', 'integer', 'min' => 1],
-            ['end_date', 'date', 'min' => time(), 'message' => 'Выберите дату из будущего'],
+            ['budget', 'integer', 'min' => 1]
         ];
     }
 
@@ -88,17 +86,24 @@ class TaskCreateForm extends Model
      * сохранение новой задачи
      *
      * @throws ServerErrorHttpException
+     * @return int $task->id
      */
-    public function createTask(): void
+    public function createTask(): int
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $task = new Tasks();
-            $task->attributes = $this->attributes;
+            $task->title = $title;
+            $task->description = $description;
+            $task->budget = $budget;
+            $task->address = $location;
+            $task->category_id = $category_id;
+            $task->end_date = $end_date;
             $task->author_id = Yii::$app->user->id;
             $task->save();
             $this->upload($task->id);
-      
+            return $task->id;
+
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollback();

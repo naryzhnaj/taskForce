@@ -3,14 +3,12 @@
 namespace frontend\controllers;
 
 use yii\filters\AccessControl;
-use frontend\models\Users;
-use frontend\models\Cities;
 use frontend\models\forms\SignupForm;
+use frontend\models\Cities;
 use Yii;
 
 class SignupController extends \yii\web\Controller
 {
-    // страница доступна только гостям
     public function behaviors()
     {
         return [
@@ -22,7 +20,13 @@ class SignupController extends \yii\web\Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['?']
+                        'roles' => ['?'],
+                        'actions' => ['index']
+                    ],
+                    [
+                        'allow' => true,
+                        'roles' => ['@'],
+                        'actions' => ['logout']
                     ]
                 ]
             ]
@@ -31,24 +35,25 @@ class SignupController extends \yii\web\Controller
 
     public function actionIndex()
     {
-        $cities = Cities::getList();
         $form = new SignupForm();
 
-        if (Yii::$app->request->getIsPost()) {
-            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-                $user = new Users();
-
-                $user->password = Yii::$app->security->generatePasswordHash($form->password);
-                $user->name = $form->username;
-                $user->email = $form->email;
-                $user->city_id = $form->city;
-
-                $user->save(false);
-                Yii::$app->user->login($user);
-                $this->goHome();
-            }
+        if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post()) && $form->validate()) {
+            $form->createUser();    
+            $this->goHome();
         }
-
-        return $this->render('index', ['model' => $form, 'cities' => $cities]);
+        return $this->render('index', [
+            'model' => $form,
+            'cities' => Cities::getList()]);
+    }
+    
+    /**
+     * Logs out the current user.
+     *
+     * @return mixed
+     */
+    public function actionLogout()
+    {
+        Yii::$app->user->logout();
+        return $this->goHome();
     }
 }

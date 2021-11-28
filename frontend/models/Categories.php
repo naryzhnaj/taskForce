@@ -68,8 +68,8 @@ class Categories extends \yii\db\ActiveRecord
      * выбирает список всех доступных
      * @return array
      */
-    public function getList()
-    {
-        return self::find()->select(['title', 'id'])->orderBy(['title' => SORT_ASC])->indexBy('id')->column();
+    public static function getList()
+    {   
+        return self::find()->select(['title', 'id'])->orderBy(['title' => SORT_ASC])->indexBy('id')->column(); 
     }
 }

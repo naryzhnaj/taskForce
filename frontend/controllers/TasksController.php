@@ -12,6 +12,7 @@ use frontend\models\forms\TaskCreateForm;
 use frontend\models\forms\RespondForm;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
+use yii\web\ForbiddenHttpException;
 use frontend\models\TaskActions;
 
 class TasksController extends \frontend\controllers\SecuredController
@@ -90,13 +91,14 @@ class TasksController extends \frontend\controllers\SecuredController
         $task = Tasks::findOne($id);
         if (!$task) {
             throw new NotFoundHttpException('задание не найдено');
-        } elseif (   // гости могут видеть только свободные задачи
-            $task->status !== Tasks::STATUS_NEW &&
-            !$task->isUserCustomer() &&
-            $task->executor->id !== Yii::$app->user->id) {
+        } elseif (!($task->status === Tasks::STATUS_NEW ||
+            $task->isUserCustomer() ||
+            $task->executor_id === Yii::$app->user->id)) {
+            // гости могут видеть только свободные задачи
             throw new NotFoundHttpException('поиск исполнителей завершен');
         }
-        // Доступные гостю действия
+        
+        // Доступное гостю действие
         $action = (new TaskActions($task, Yii::$app->user->id))->getActionList();
 
         return $this->render('view', ['task' => $task, 'action' => $action]);
@@ -112,8 +114,9 @@ class TasksController extends \frontend\controllers\SecuredController
         $form = new TaskCreateForm();
 
         if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post())) {
-            if ($form->validate() && $form->createTask()) {
-                return $this->goHome();
+            if ($form->validate()) {
+                $task_id = $form->createTask();
+                return $this->redirect(['view', 'id' => $task_id]);
             }
         }
 
@@ -137,6 +140,7 @@ class TasksController extends \frontend\controllers\SecuredController
         }
         $task = new TaskActions($respond->task, Yii::$app->user->id);
         $task->admitRespond($respond);
+
         return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
 
@@ -157,6 +161,7 @@ class TasksController extends \frontend\controllers\SecuredController
         }
         $task = new TaskActions($respond->task, Yii::$app->user->id);
         $task->refuseRespond($respond);
+       
         return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
 
@@ -174,6 +179,7 @@ class TasksController extends \frontend\controllers\SecuredController
             $task = new TaskActions(Tasks::findOne($id), Yii::$app->user->id);
             $task->respond($model);
         }
+    
         return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
 

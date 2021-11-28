@@ -135,11 +135,11 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return array
      */
-    public function getFavorites0()
+    public function getFavoriteList()
     {
-        return $this->hasMany(Favorites::className(), ['favorite_id' => 'id']);
+        return $this->hasMany(Favorites::className(), ['user_id' => 'id'])->select('favorite_id')->column() ?: [];
     }
 
     /**
@@ -209,7 +209,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public static function isUserDoer($id)
     {
-        return (new Query())->from('specialization s')->where(['s.user_id' => $id])->exists();
+        return (new Query())->from('specialization')->where(['user_id' => $id])->exists();
     }
 
     /**
@@ -219,28 +219,32 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public static function getDoersList()
     {
-        return self::find()->innerJoinWith('specialization')->distinct();
+        $subQuery = (new Query())->select('user_id')->from('specialization')->distinct();
+        return self::find()->where(['in', 'id', $subQuery])->indexBy('id');   
+    
     }
-
+ 
     /**
-     * получить список отмеченных категорий.
+     * получить список навыков-категорий.
      *
      * @return array
      */
     public function getProfessions()
     {
-        return (new Query())->select('c.title')->from('specialization s')->where(['s.user_id' => $this->id])
-            ->innerJoin('categories c', 's.category_id=c.id')->orderBy(['c.title' => SORT_ASC])->column();
+        return (new Query())->select('title')->from('specialization s')->where(['user_id' => $this->id])
+    ->innerJoin('categories c', 's.category_id=c.id')->orderBy(['title' => SORT_ASC])->column();
+
     }
 
     /**
-     * пересчет рейтинга
+     * пересчет и сохранение рейтинга
      *
      * @return void
      */
     public function countRating()
     {
         $sumMarks = $this->hasMany(Reviews::className(), ['user_id' => 'id'])->sum('value');
-        $this->rating = $sumMarks/$this->reviewsAmount;
-        $this->save();}
+        $this->rating = $sumMarks / $this->reviewsAmount;
+        $this->save();
+    }
 }

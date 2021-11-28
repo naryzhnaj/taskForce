@@ -2,6 +2,7 @@
 
 namespace frontend\models;
 
+use yii\db\Query;
 /**
  * This is the model class for table "tasks".
  *
@@ -164,7 +165,7 @@ class Tasks extends \yii\db\ActiveRecord
     /**
      * выборка свободных заданий для лэндинга.
      *
-     * @return \yii\db\ActiveQuery
+     * @return array
      */
     public static function getRecent(int $amount)
     {
@@ -182,18 +183,21 @@ class Tasks extends \yii\db\ActiveRecord
     public static function getMainList()
     {
         return self::find()
-            ->select('tasks.id, category_id, title, description, budget, address, tasks.dt_add')
-            ->where(['status' => self::STATUS_NEW])->andWhere('end_date >= now() OR end_date IS NULL');
+            ->select('id, category_id, title, description, budget, address, dt_add')
+            ->where(['status' => self::STATUS_NEW])
+            ->andWhere('end_date >= now() OR end_date IS NULL')
+            ->indexBy('id');
     }
 
     /**
-     * выборка занятых исполнителей.
+     * выборка свободных исполнителей.
      *
-     * @return \yii\db\ActiveQuery
+     * @return \yii\db\Query
      */
-    public static function getBusyDoers()
+    public static function getFreeDoers()
     {
-        return self::find()->select('executor_id')->where(['status' => self::STATUS_PROGRESS]);
+        $busyQuery = (new Query())->select('executor_id')->from('tasks')->where(['status' => self::STATUS_PROGRESS])->column();
+        return (new Query())->select('id')->from('users')->where(['not in', 'id', $busyQuery]);
     }
 
     /**
@@ -214,11 +218,11 @@ class Tasks extends \yii\db\ActiveRecord
     public function getVisibleResponds()
     {
         return ($this->isUserCustomer() && $this->status === self::STATUS_NEW) ?
-            $this->hasMany(Responds::className(), ['task_id' => 'id'])->where(['responds.status' => self::STATUS_NEW]) : [];
+            $this->getResponds()->where(['responds.status' => self::STATUS_NEW])->all() : [];
     }
 
     /**
-     * контактное лицо в блоке сообщений на стр.просмотра.
+     * отображаемое контактное лицо в блоке сообщений на стр.просмотра.
      *
      * @return Users
      */
