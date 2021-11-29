@@ -5,6 +5,8 @@
  */
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
+use yii\widgets\ActiveForm;
+use yii\helpers\Html;
 
 Modal::begin([
     'toggleButton' => [
@@ -23,7 +25,16 @@ Modal::begin([
         Вы собираетесь удалить задание.
         Вы уверены?
     </p>
-    <button class="button__form-modal button" type="button" data-dismiss="modal">Отмена</button>
-    <button class="button__form-modal button refusal-button" href ="<?=Url::to(['tasks/cancel', 'id' => $task_id]); ?>">Отказаться</button>
+    <button class="button" type="button" data-dismiss="modal">Отмена</button>
+
+    <?php $form = ActiveForm::begin([
+        'options' => [
+            'method' => 'post',
+        ],
+        'action' => Url::toRoute(['tasks/cancel', 'id' => $task_id]),
+    ]); 
+        echo Html::submitButton('Отказаться', ['class' => 'button refusal-button']);
+        ActiveForm::end();
+    ?>
     <button class="form-modal-close" type="button" data-dismiss="modal">Закрыть</button>
 <?php Modal::end(); ?>

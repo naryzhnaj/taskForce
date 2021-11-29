@@ -93,12 +93,12 @@ class TaskCreateForm extends Model
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $task = new Tasks();
-            $task->title = $title;
-            $task->description = $description;
-            $task->budget = $budget;
-            $task->address = $location;
-            $task->category_id = $category_id;
-            $task->end_date = $end_date;
+            $task->title = $this->title;
+            $task->description = $this->description;
+            $task->budget = $this->budget;
+            $task->address = $this->location;
+            $task->category_id = $this->category_id;
+            $task->end_date = $this->end_date;
             $task->author_id = Yii::$app->user->id;
             $task->save();
             $this->upload($task->id);

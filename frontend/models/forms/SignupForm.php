@@ -54,10 +54,10 @@ class SignupForm extends Model
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $user = new Users();
-            $user->password = Yii::$app->security->generatePasswordHash($form->password);
-            $user->name = $form->username;
-            $user->email = $form->email;
-            $user->city_id = $form->city;
+            $user->password = Yii::$app->security->generatePasswordHash($this->password);
+            $user->name = $this->username;
+            $user->email = $this->email;
+            $user->city_id = $this->city;
             $user->save(false);
             Yii::$app->user->login($user);
 
