@@ -86,12 +86,13 @@ $this->beginPage(); ?>
             <a href="<?=Url::toRoute('/users'); ?>">Исполнители</a>
           </li>
           <li class="site-list__item">
-              <?php if (Users::isUserDoer(Yii::$app->user->id)):?>
-                  <a href="#">Мой профиль</a>   
-              <?php else:?>
-                  <a href="<?=Url::toRoute('/tasks/create'); ?>">Создать задание</a>
-              <?php endif; ?>
+            <a href="#">Мой профиль</a>
           </li>
+          <?php if (!Users::isUserDoer(Yii::$app->user->id)):?>
+            <li class="site-list__item">
+              <a href="<?=Url::toRoute('/tasks/create'); ?>">Создать задание</a>
+            </li>
+          <?php endif; ?>
         </ul>
       </div>
       <div class="header__town">

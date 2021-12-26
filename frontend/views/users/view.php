@@ -17,10 +17,9 @@ $age = (new DateTime('now'))->diff(new DateTime($user->account->birth_date))->fo
                 <h1><?=Html::encode($user->name); ?></h1>
                 <p><?=$user->city->title, $age; ?></p>
                 <div class="profile-mini__name five-stars__rate">
-                    <?=RatingWidget::widget(['rating' => $user->rating]); ?>
-                    <b><?=$user->rating; ?></b>
+                    <?=RatingWidget::widget(['rating' => $user->getRating()]); ?>
                 </div>
-                <b class="done-task">Выполнил <?=$user->orders; ?> заказов</b><b class="done-review">Получил <?=$user->reviewsAmount; ?> отзывов</b>
+                <b class="done-task">Выполнил <?=$user->getOrders(); ?> заказов</b><b class="done-review">Получил <?=$user->reviewsAmount; ?> отзывов</b>
             </div>
             <div class="content-view__headline user__card-bookmark user__card-bookmark--current">
                 <span>Был на сайте 25 минут назад</span>

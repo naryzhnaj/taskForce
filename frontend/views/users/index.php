@@ -17,27 +17,14 @@ $this->title = 'Исполнители';
  * шаблон для отрисовки чекбоксов.
  */
 $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): string {
+    $isChecked = $checked ? 'checked' : '';
     return   "<label class='checkbox__legend'>
-    <input class='visually-hidden checkbox__input' type='checkbox' {$checked} name='{$name}' value='{$value}'>
+    <input class='visually-hidden checkbox__input' type='checkbox' {$isChecked} name='{$name}' value='{$value}'>
     <span>{$label}</span>
     </label>";
 }
 ?>
 <section class="user__search">
-    <div class="user__search-link">
-        <p>Сортировать по:</p>
-        <ul class="user__search-list">
-            <li class="user__search-item">
-                <a href="<?=Url::toRoute(['', 'sort' => 'rating']); ?>" class="link-regular">Рейтингу</a>
-            </li>
-            <li class="user__search-item">
-                <a href="<?=Url::toRoute(['', 'sort' => 'orders']); ?>" class="link-regular">Числу заказов</a>
-            </li>
-            <li class="user__search-item">
-                <a href="<?=Url::toRoute(['', 'sort' => 'popularity']); ?>" class="link-regular">Популярности</a>
-            </li>
-        </ul>
-    </div>
     <?php
         echo ListView::widget([
             'dataProvider' => $dataProvider,
@@ -50,7 +37,8 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
         <?php $form = ActiveForm::begin([
             'id' => 'search-user',
             'options' => [
-                'method' => 'post',
+                'method' => 'get',
+                'tag' => false,
                 'class' => 'search-task__form',
             ]
         ]); ?>
@@ -63,10 +51,14 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
         <fieldset class="search-task__categories">
             <legend>Дополнительно</legend>
             <?php
-            echo $form->field($model, 'is_free', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
-            echo $form->field($model, 'is_online', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
-            echo $form->field($model, 'with_reviews', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
-            echo $form->field($model, 'is_favorite', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
+            echo $form->field($model, 'is_free', ['labelOptions' => ['class' => "checkbox__legend"]])
+                ->checkbox(['class' => 'checkbox__input']);
+            echo $form->field($model, 'is_online', ['labelOptions' => ['class' => "checkbox__legend"]])
+                ->checkbox(['class' => 'checkbox__input']);
+            echo $form->field($model, 'is_favorite', ['labelOptions' => ['class' => "checkbox__legend"]])
+                ->checkbox(['class' => 'checkbox__input']);
+            echo $form->field($model, 'with_reviews', ['labelOptions' => ['class' => "checkbox__legend"]])
+                ->checkbox(['class' => "checkbox__input"]);
             ?>
         </fieldset>
         <?php

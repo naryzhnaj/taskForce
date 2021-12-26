@@ -5,6 +5,7 @@ namespace frontend\models\forms;
 use yii\base\Model;
 use yii\db\Query;
 use frontend\models\Tasks;
+use frontend\models\Users;
 
 /**
  * This is the form class for executor search.
@@ -49,28 +50,30 @@ class UserSearchForm extends Model
     /**
      * добавляет к запросу условия в зависимости от выбранных полей
      *
-     * @param ActiveQuery $startQuery
      * @return ActiveQuery $query
      */
-    public function search($startQuery)
+    public function search()
     {
-        $query = clone $startQuery;
-        $query->andFilterWhere(['like', 'name', $this->name]);
-        
+        $subQuery = (new Query())->select('user_id AS id')->from('specialization')->distinct();
+        $query = Users::find()->where(['id'=> $subQuery])->indexBy('id');
+
+        if ($this->name) {
+            return $query->andWhere(['like', 'name', $this->name]);
+        }
         if ($this->is_favorite) {
             $query->andWhere(['id' => \Yii::$app->user->identity->favoriteList]);
         }
         if ($this->is_free) {
             $query->andWhere(['id' => Tasks::getFreeDoers()]);
         }
-        if (count($this->categories)) {
+        if (($this->categories)) {
             $query->andWhere(['id' =>
-            (new Query())->select('user_id AS id')->from('specialization')->where(['in', 'category_id', $this->categories])]);
+                (new Query())->select('user_id AS id')->from('specialization')->where(['in', 'category_id', $this->categories])]);
         }
         if ($this->with_reviews) {
             $query->andWhere(['id' => (new Query())->select('user_id AS id')->from('reviews')]);
         }
-        
+          
         return $query;
     }
 }

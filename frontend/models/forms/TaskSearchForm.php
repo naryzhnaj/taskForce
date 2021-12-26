@@ -4,6 +4,7 @@ namespace frontend\models\forms;
 
 use yii\base\Model;
 use yii\db\Query;
+use frontend\models\Tasks;
 
 /**
  * This is the form class for task search.
@@ -51,7 +52,6 @@ class TaskSearchForm extends Model
     public function getInterval()
     {
         switch ($this->period) {
-            case 'all':
             case 'day': $term = '24 HOUR'; break;
             case 'week': $term = '7 DAY'; break;
             case 'month': $term = '30 DAY';
@@ -63,25 +63,22 @@ class TaskSearchForm extends Model
     /**
      * добавляет к запросу условия поиска
      *
-     * @param ActiveQueryQuery $startQuery
      * @return ActiveQueryQuery $query
      */
-    public function search($startQuery)
+    public function search()
     {
-        $query = clone $startQuery;
-
+        $query = Tasks::getMainList();
         $query->andFilterWhere(['like', 'title', $this->title]);
         
         if ($this->is_distant) {
             $query->andWhere('address IS NULL');
         }
-        if ($this->period != 'all') {
+        if (in_array($this->period, ['day', 'week', 'month'])) {
             $query->andWhere('dt_add >=' . $this->interval);
         }
-        if (count($this->categories)) {
-           $query->andWhere(['in', 'category_id', $this->categories]);
+        if (($this->categories)) {
+            $query->andWhere(['in', 'category_id', $this->categories]);
         }
-
         if ($this->without_responds) {
             $query->andWhere(['not in', 'id', (new Query())->select('task_id')->from('responds')->distinct()->column()]);
         }

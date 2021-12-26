@@ -51,27 +51,17 @@ class TasksController extends \frontend\controllers\SecuredController
         if (!$categories) {
             throw new NotFoundHttpException('не найдено ни одной категории');
         }
-
         $form = new TaskSearchForm();
-        // стартовый запрос
-        $query = Tasks::getMainList();
-
-        // добавляются условия из формы
-        if (Yii::$app->request->getIsPost()) {
-            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-                $query = $form->search($query);
-            }
-        }
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['dt_add' => SORT_DESC]],
-            'pagination' => [
-                'pageSize' => self::CARDS_AMOUNT,
-            ],
-        ]);
+        $form->load(Yii::$app->request->post());
 
         return $this->render('index', [
-            'dataProvider' => $dataProvider,
+            'dataProvider' => new ActiveDataProvider([
+                'query' => $form->search(),
+                'sort' => ['defaultOrder' => ['dt_add' => SORT_DESC]],
+                'pagination' => [
+                    'pageSize' => self::CARDS_AMOUNT,
+                ],
+            ]),
             'categories' => $categories,
             'model' => $form,
         ]);
@@ -112,12 +102,9 @@ class TasksController extends \frontend\controllers\SecuredController
     public function actionCreate()
     {
         $form = new TaskCreateForm();
-
-        if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post())) {
-            if ($form->validate()) {
-                $task_id = $form->createTask();
-                return $this->redirect(['view', 'id' => $task_id]);
-            }
+        
+        if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post()) && $form->validate()) {
+            return $this->redirect(['view', 'id' => $form->createTask()]);   
         }
 
         return $this->render('create', ['categories' => Categories::getList(), 'model' => $form]);

@@ -6,10 +6,10 @@ use yii\base\Model;
 /**
  * This is the form class for respond's popup.
  *
- * @var $price int
- * @var $mark int
- * @var $comment string
- * @var $answer bool
+ * @var $price int      запрашиваемая претендентом цена
+ * @var $mark int       оценка выполнения
+ * @var $comment string комментарий
+ * @var $answer bool    считает ли заказчик услугу оказанной
  */
 class RespondForm extends Model
 {
@@ -25,9 +25,9 @@ class RespondForm extends Model
             ['answer', 'default', 'value' => true],
             ['comment', 'string'],
             ['comment', 'trim'],
-            ['price', 'integer', 'min' => 1],
+            ['price', 'integer'],
+            ['price', 'default', 'value' => 0],
             ['mark', 'integer', 'min' => 0, 'max' => 5],
-            ['price', 'required', 'message' => 'Укажите размер вознаграждения'],
             ['mark', 'default', 'value' => 0]
         ];
     }

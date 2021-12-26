@@ -12,10 +12,10 @@ use yii\db\Query;
  * @property string           $name
  * @property string           $email
  * @property string           $password
- * @property string           $rating
- * @property int              $orders
+ * will be deleted @property string           $rating
+ * will be deleted @property int              $orders
  * @property int              $failures
- * @property int              $popularity
+ * will be deleted @property int              $popularity
  * @property string           $dt_add
  * @property Accounts         $account
  * @property Chats[]          $chats
@@ -72,9 +72,8 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function rules()
     {
         return [
-            [['city_id', 'orders', 'failures', 'popularity'], 'integer'],
+            [['city_id', 'failures'], 'integer'],
             [['name', 'email', 'password'], 'required'],
-            [['rating'], 'number'],
             [['dt_add'], 'safe'],
             [['name', 'email'], 'string', 'max' => 60],
             [['password'], 'string', 'max' => 128],
@@ -94,10 +93,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'name' => 'Name',
             'email' => 'Email',
             'password' => 'Password',
-            'rating' => 'рейтинг',
-            'orders' => 'число заказов',
             'failures' => 'число провалов',
-            'popularity' => 'популярность',
             'dt_add' => 'дата регистрации',
         ];
     }
@@ -154,7 +150,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      * подсчет кол-ва отзывов.
      *
      * @return int
-     */
+     */ 
     public function getReviewsAmount()
     {
         return $this->hasMany(Reviews::className(), ['user_id' => 'id'])->count() ?? 0;
@@ -185,11 +181,11 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return integer
      */
-    public function getTasks0()
+    public function getOrders()
     {
-        return $this->hasMany(Tasks::className(), ['executor_id' => 'id']);
+        return $this->hasMany(Tasks::className(), ['executor_id' => 'id'])->count() ?? 0;;
     }
 
     /**
@@ -211,18 +207,6 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         return (new Query())->from('specialization')->where(['user_id' => $id])->exists();
     }
-
-    /**
-     * получить список всех исполнителей.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public static function getDoersList()
-    {
-        $subQuery = (new Query())->select('user_id')->from('specialization')->distinct();
-        return self::find()->where(['in', 'id', $subQuery])->indexBy('id');   
-    
-    }
  
     /**
      * получить список навыков-категорий.
@@ -232,19 +216,16 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function getProfessions()
     {
         return (new Query())->select('title')->from('specialization s')->where(['user_id' => $this->id])
-    ->innerJoin('categories c', 's.category_id=c.id')->orderBy(['title' => SORT_ASC])->column();
-
+        ->innerJoin('categories c', 's.category_id=c.id')->orderBy(['title' => SORT_ASC])->column();
     }
 
     /**
-     * пересчет и сохранение рейтинга
+     * пересчет рейтинга
      *
-     * @return void
+     * @return number
      */
-    public function countRating()
+    public function getRating()
     {
-        $sumMarks = $this->hasMany(Reviews::className(), ['user_id' => 'id'])->sum('value');
-        $this->rating = $sumMarks / $this->reviewsAmount;
-        $this->save();
+        return $this->hasMany(Reviews::className(), ['user_id' => 'id'])->average('value') ?? 0;
     }
 }

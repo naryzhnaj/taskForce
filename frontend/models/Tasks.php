@@ -228,6 +228,6 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getContact()
     {
-        return ($this->isUserCustomer() && $this->status !== self::STATUS_NEW) ? $this->executor : $this->author;
+        return ($this->isUserCustomer() && $this->status === self::STATUS_PROGRESS) ? $this->executor : $this->author;
     }
 }

@@ -9,7 +9,6 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 
 $this->title = 'Создать задание';
-$this->registerJsFile('@web/js/dropzone.js', ['position' => \yii\web\VIEW::POS_HEAD]);
 ?>
 <section class="create__task">
    <h1>Публикация нового задания</h1>
@@ -37,7 +36,7 @@ $this->registerJsFile('@web/js/dropzone.js', ['position' => \yii\web\VIEW::POS_H
              ['tag' => 'span']);
 
          echo $form->field($model, 'category_id')->dropDownList($categories,
-             ['class' => 'multiple-select input multiple-select-big'])->hint('Выберите категорию', ['tag' => 'span']);
+            ['class' => 'multiple-select input multiple-select-big'])->hint('Выберите категорию', ['tag' => 'span']);
       ?>
       <label>Файлы</label> 
       <span>Загрузите файлы, которые помогут исполнителю лучше выполнить или оценить работу</span>
@@ -92,6 +91,3 @@ $this->registerJsFile('@web/js/dropzone.js', ['position' => \yii\web\VIEW::POS_H
       </div>
    </div>
 </section>
-<script>
-  var dropzone = new Dropzone("div.create__file", {url: "/", paramName: "Attach"});
-</script>

@@ -7,8 +7,8 @@ use yii\web\ServerErrorHttpException;
 /**
  * бизнес-логика для сущности Задание.
  *
- * @var Tasks объект, над которым действия совершаются
- * @var int   $user_id ид текущего пользователя
+ * @var $model Tasks объект, над которым действия совершаются
+ * @var $user_id int ид текущего пользователя
  */
 class TaskActions
 {
@@ -100,12 +100,10 @@ class TaskActions
         }
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $respond->status = self::STATUS_PROGRESS;
-            ++$respond->author->orders;
+            $respond->updateAttributes(['status' => self::STATUS_PROGRESS]);
             $this->model->status = self::STATUS_PROGRESS;
             $this->model->executor_id = $respond->author_id;
-
-            if (!$this->model->save(false) || !$respond->save(false) || !$respond->author->save(false)) {
+            if (!$this->model->save()) {
                 throw new \Exception('Не удалось сохранить');
             }
             $transaction->commit();
@@ -127,8 +125,7 @@ class TaskActions
         if ($this->getRole() !== self::CUSTOMER || $respond->status !== self::STATUS_NEW) {
             return false;
         }
-        $respond->status = self::STATUS_CANCEL;
-        $respond->save(false);
+        $respond->updateAttributes(['status' => self::STATUS_CANCEL]);
     }
 
     /**
@@ -154,7 +151,7 @@ class TaskActions
         $this->model->status = self::STATUS_FAIL;
         ++$this->model->executor->failures;
 
-        if (!$this->model->executor->save(false) || !$this->model->save(false)) {
+        if (!$this->model->executor->save() || !$this->model->save()) {
             throw new ServerErrorHttpException('при сохранении произошла ошибка');
         }
     }
@@ -169,8 +166,7 @@ class TaskActions
         if ($this->getRole() !== self::CUSTOMER || $this->model->status !== self::STATUS_NEW) {
             return false;
         }
-        $this->model->status = self::STATUS_CANCEL;
-        $this->model->save(false);
+        $this->model->updateAttributes(['status' => self::STATUS_CANCEL]);
     }
 
     /**
@@ -194,12 +190,12 @@ class TaskActions
             $review->user_id = $this->model->executor_id;
             $review->value = $data->mark;
             $review->comment = $data->comment;
-            $review->save();
-            $this->model->executor->countRating();
+            if (!$review->save()) {
+                throw new \Exception('Не удалось сохранить');
+            }
             // проверка успешности
             if ($data->answer) {
-                $this->model->status = self::STATUS_COMPLETED;
-                $this->model->save(false);
+                $this->model->updateAttributes(['status' => self::STATUS_COMPLETED]);    
             } else {
                 $this->fail();
             }
@@ -227,6 +223,8 @@ class TaskActions
         $respond->author_id = $this->user_id;
         $respond->price = $data->price;
         $respond->comment = $data->comment;
-        $respond->save();
+        if (!$respond->save()) {
+            throw new ServerErrorHttpException('при сохранении произошла ошибка');
+        }
     }
 }

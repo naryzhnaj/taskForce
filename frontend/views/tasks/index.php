@@ -14,8 +14,9 @@ use yii\widgets\ListView;
  * шаблон для отрисовки чекбоксов.
  */
 $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value) {
+    $isChecked = $checked ? 'checked' : '';
     return  "<label class='checkbox__legend'>
-    <input class='visually-hidden checkbox__input' type='checkbox' {$checked} name='{$name}' value='{$value}'>
+    <input class='visually-hidden checkbox__input' type='checkbox' {$isChecked} name='{$name}' value='{$value}'>
     <span>{$label}</span>
     </label>";
 };
@@ -37,8 +38,9 @@ $this->title = 'Новые задания';
         <?php $form = ActiveForm::begin([
             'id' => 'search-task',
             'options' => [
-            'method' => 'post',
-            'class' => 'search-task__form',
+                'tag' => false,
+                'method' => 'get',
+                'class' => 'search-task__form',
             ]
         ]); ?>
         <fieldset class="search-task__categories">
@@ -48,8 +50,10 @@ $this->title = 'Новые задания';
         <fieldset class="search-task__categories">
             <legend>Дополнительно</legend>
             <?php
-            echo $form->field($model, 'without_responds', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
-            echo $form->field($model, 'is_distant', ['labelOptions' => ['class' => "checkbox__legend"]])->checkbox();
+            echo $form->field($model, 'without_responds', ['labelOptions' => ['class' => "checkbox__legend"]])
+            ->checkbox(['class' => "checkbox__input"]);
+            echo $form->field($model, 'is_distant', ['labelOptions' => ['class' => "checkbox__legend"]])
+            ->checkbox(['class' => "checkbox__input"]);
             ?>
         </fieldset>
         <?php

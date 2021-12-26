@@ -28,18 +28,19 @@ class TaskCreateForm extends Model
     public $category_id;
     public $end_date;
     public $files;
-
+    
     public function rules()
     {
         return [
             [['title', 'description'], 'required', 'message' => 'Это поле необходимо заполнить'],
-            [['title', 'description'], 'trim'],
+            [['title', 'description', 'location'], 'trim'],
             ['title', 'string', 'min' => 10],
             ['description', 'string', 'min' => 30],
 
             ['files', 'file', 'maxFiles' => 0],
             ['category_id', 'required', 'message' => 'Задание должно принадлежать одной из категорий'],
             ['category_id', 'exist', 'skipOnError' => false, 'targetClass' => \frontend\models\Categories::class, 'targetAttribute' => ['category_id' => 'id']],
+            ['end_date', 'date', 'format' => 'php:Y-m-d', 'min' => time(), 'message' => 'Выберите дату из будущего'],
             ['budget', 'integer', 'min' => 1]
         ];
     }
@@ -92,19 +93,18 @@ class TaskCreateForm extends Model
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $task = new Tasks();
+            $task = new Tasks();      
             $task->title = $this->title;
             $task->description = $this->description;
             $task->budget = $this->budget;
-            $task->address = $this->location;
             $task->category_id = $this->category_id;
             $task->end_date = $this->end_date;
             $task->author_id = Yii::$app->user->id;
             $task->save();
             $this->upload($task->id);
-            return $task->id;
 
             $transaction->commit();
+            return $task->id;
         } catch (\Exception $e) {
             $transaction->rollback();
             throw new \yii\web\ServerErrorHttpException("Извините, при сохранении произошла ошибка");

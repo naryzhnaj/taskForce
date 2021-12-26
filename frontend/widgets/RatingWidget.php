@@ -17,6 +17,7 @@ class RatingWidget extends \yii\base\Widget
     {
         $n = round($this->rating);
 
-        return str_repeat('<span></span>', $n).str_repeat('<span class="star-disabled"></span>', self::MAX_RATE - $n);
+        return str_repeat('<span></span>', $n).str_repeat('<span class="star-disabled"></span>', self::MAX_RATE - $n)
+        .'<b>'.\Yii::$app->formatter->asDecimal($this->rating) . '</b>';
     }
 }

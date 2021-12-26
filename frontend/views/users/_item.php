@@ -7,15 +7,14 @@ use frontend\widgets\RatingWidget;
     <div class="feedback-card__top">
         <div class="user__search-icon">
             <a href="#"><img src="/img/man-glasses.jpg" width="65" height="65"></a>
-            <span><?=$model->orders; ?> заданий</span>
+            <span><?=$model->getOrders(); ?> заданий</span>
             <span><?=$model->reviewsAmount; ?> отзывов</span>
         </div>
         <div class="feedback-card__top--name user__search-card">
             <p class="link-name">
                 <a href="<?=Url::toRoute(['users/view', 'id' => $model->id]); ?>" class="link-regular"><?=Html::encode($model->name); ?></a>
             </p>
-            <?=RatingWidget::widget(['rating' => $model->rating]); ?>
-            <b><?=$model->rating; ?></b>
+            <?=RatingWidget::widget(['rating' => $model->getRating()]); ?>
             <p class="user__search-content"><?=Html::encode($model->account->bio); ?></p>
         </div>
         <span class="new-task__time">Был на сайте 25 минут назад</span>
