@@ -10,27 +10,27 @@ use frontend\models\Users;
 /**
  * This is the form class for executor search.
  *
- * @var bool $is_free
- * @var bool $is_online
- * @var bool $with_reviews
- * @var bool $is_favorite
+ * @var bool $isFree
+ * @var bool $isOnline
+ * @var bool $withReviews
+ * @var bool $isFavorite
  * @var string $name
  * @var int[] $categories
  */
 class UserSearchForm extends Model
 {
-    public $is_free;
-    public $is_online;
-    public $with_reviews;
-    public $is_favorite;
+    public $isFree;
+    public $isOnline;
+    public $withReviews;
+    public $isFavorite;
     public $categories;
     public $name;
 
     public function rules()
     {
         return [
-            [['is_free', 'is_online', 'with_reviews', 'is_favorite'], 'boolean'],
-            [['is_free', 'is_online', 'with_reviews', 'is_favorite'], 'default', 'value' => false],
+            [['isFree', 'isOnline', 'withReviews', 'isFavorite'], 'boolean'],
+            [['isFree', 'isOnline', 'withReviews', 'isFavorite'], 'default', 'value' => false],
             ['categories', 'default', 'value' => []],
             ['name', 'string'],
             ['name', 'trim'],
@@ -40,10 +40,10 @@ class UserSearchForm extends Model
     public function attributeLabels()
     {
         return [
-            'is_free' => 'Сейчас свободен',
-            'is_online' => 'Сейчас онлайн',
-            'with_reviews' => 'Есть отзывы',
-            'is_favorite' => 'В избранном',
+            'isFree' => 'Сейчас свободен',
+            'isOnline' => 'Сейчас онлайн',
+            'withReviews' => 'Есть отзывы',
+            'isFavorite' => 'В избранном',
         ];
     }
 
@@ -54,26 +54,25 @@ class UserSearchForm extends Model
      */
     public function search()
     {
-        $subQuery = (new Query())->select('user_id AS id')->from('specialization')->distinct();
-        $query = Users::find()->where(['id'=> $subQuery])->indexBy('id');
+        $query = Users::find()->innerJoinWith('specialization')->indexBy('id');
 
         if ($this->name) {
             return $query->andWhere(['like', 'name', $this->name]);
         }
-        if ($this->is_favorite) {
-            $query->andWhere(['id' => \Yii::$app->user->identity->favoriteList]);
+        if ($this->isFavorite) {
+            $query->innerJoin('favorites f', 'f.favorite_id=users.id')->where(['f.user_id' => \Yii::$app->user->id]);
         }
-        if ($this->is_free) {
-            $query->andWhere(['id' => Tasks::getFreeDoers()]);
+        if ($this->withReviews) {
+            $query->innerJoinWith('reviews');
         }
-        if (($this->categories)) {
-            $query->andWhere(['id' =>
-                (new Query())->select('user_id AS id')->from('specialization')->where(['in', 'category_id', $this->categories])]);
+        if ($this->isFree) {
+            $busyQuery = (new Query())->select('executor_id AS id')->from('tasks')->where(['status' => Tasks::STATUS_PROGRESS]);
+            $query->andWhere(['not in', 'users.id', $busyQuery ]);
         }
-        if ($this->with_reviews) {
-            $query->andWhere(['id' => (new Query())->select('user_id AS id')->from('reviews')]);
+        if ($this->categories) {
+            $query->andWhere(['in', 'category_id', $this->categories]);
         }
-          
-        return $query;
+
+        return $query->distinct();
     }
 }

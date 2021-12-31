@@ -23,7 +23,7 @@ class UsersController extends \frontend\controllers\SecuredController
     public function actionIndex()
     {
         $form = new UserSearchForm();
-        $form->load(Yii::$app->request->post());
+        $form->load(Yii::$app->request->get());
 
         return $this->render('index', [
             'dataProvider' => new ActiveDataProvider([
@@ -49,7 +49,7 @@ class UsersController extends \frontend\controllers\SecuredController
     public function actionView(int $id)
     {
         $user = Users::findOne($id);
-        if (!$user || !Users::isUserDoer($id)) {
+        if (!$user || !$user->isDoer()) {
             throw new NotFoundHttpException('исполнитель не найден');
         }
 

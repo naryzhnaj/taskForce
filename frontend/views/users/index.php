@@ -36,8 +36,8 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
     <div class="search-task__wrapper">
         <?php $form = ActiveForm::begin([
             'id' => 'search-user',
+            'method' => 'get',
             'options' => [
-                'method' => 'get',
                 'tag' => false,
                 'class' => 'search-task__form',
             ]
@@ -51,13 +51,13 @@ $checkboxTemplateCallback = function ($index, $label, $name, $checked, $value): 
         <fieldset class="search-task__categories">
             <legend>Дополнительно</legend>
             <?php
-            echo $form->field($model, 'is_free', ['labelOptions' => ['class' => "checkbox__legend"]])
+            echo $form->field($model, 'isFree', ['labelOptions' => ['class' => "checkbox__legend"]])
                 ->checkbox(['class' => 'checkbox__input']);
-            echo $form->field($model, 'is_online', ['labelOptions' => ['class' => "checkbox__legend"]])
+            echo $form->field($model, 'isOnline', ['labelOptions' => ['class' => "checkbox__legend"]])
                 ->checkbox(['class' => 'checkbox__input']);
-            echo $form->field($model, 'is_favorite', ['labelOptions' => ['class' => "checkbox__legend"]])
+            echo $form->field($model, 'isFavorite', ['labelOptions' => ['class' => "checkbox__legend"]])
                 ->checkbox(['class' => 'checkbox__input']);
-            echo $form->field($model, 'with_reviews', ['labelOptions' => ['class' => "checkbox__legend"]])
+            echo $form->field($model, 'withReviews', ['labelOptions' => ['class' => "checkbox__legend"]])
                 ->checkbox(['class' => "checkbox__input"]);
             ?>
         </fieldset>

@@ -104,7 +104,7 @@ $contactPerson = $task->contact;
             <p class="info-customer">
                 <span><?=Yii::$app->formatter->asRelativeTime($contactPerson->dt_add); ?> на сайте</span>
                 <?php if ($contactPerson->id === $task->executor_id):?>
-                    <span><?=$contactPerson->getOrders(); ?>заданий</span>
+                    <span><?=$contactPerson->ordersAmount; ?>заданий</span>
                     <a href="<?=Url::toRoute(['users/view', 'id' => $task->executor_id]); ?>" class="link-regular">Смотреть профиль</a>   
                 <?php endif; ?>
             </p> 

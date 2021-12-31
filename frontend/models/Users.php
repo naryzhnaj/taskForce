@@ -2,8 +2,6 @@
 
 namespace frontend\models;
 
-use yii\db\Query;
-
 /**
  * This is the model class for table "users".
  *
@@ -14,7 +12,7 @@ use yii\db\Query;
  * @property string           $password
  * will be deleted @property string           $rating
  * will be deleted @property int              $orders
- * @property int              $failures
+ * will be deleted @property int              $failures
  * will be deleted @property int              $popularity
  * @property string           $dt_add
  * @property Accounts         $account
@@ -78,7 +76,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['name', 'email'], 'string', 'max' => 60],
             [['password'], 'string', 'max' => 128],
             ['email', 'unique'],
-            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::className(), 'targetAttribute' => ['city_id' => 'id']],
+            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::class, 'targetAttribute' => ['city_id' => 'id']],
         ];
     }
 
@@ -103,7 +101,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getAccount()
     {
-        return $this->hasOne(Accounts::className(), ['user_id' => 'id']);
+        return $this->hasOne(Accounts::class, ['user_id' => 'id']);
     }
 
     /**
@@ -111,7 +109,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getChats()
     {
-        return $this->hasMany(Chats::className(), ['receiver_id' => 'id']);
+        return $this->hasMany(Chats::class, ['receiver_id' => 'id']);
     }
 
     /**
@@ -119,7 +117,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getChats0()
     {
-        return $this->hasMany(Chats::className(), ['sender_id' => 'id']);
+        return $this->hasMany(Chats::class, ['sender_id' => 'id']);
     }
 
     /**
@@ -127,15 +125,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getFavorites()
     {
-        return $this->hasMany(Favorites::className(), ['user_id' => 'id']);
-    }
-
-    /**
-     * @return array
-     */
-    public function getFavoriteList()
-    {
-        return $this->hasMany(Favorites::className(), ['user_id' => 'id'])->select('favorite_id')->column() ?: [];
+        return $this->hasMany(Favorites::class, ['user_id' => 'id']);
     }
 
     /**
@@ -143,7 +133,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getResponds()
     {
-        return $this->hasMany(Responds::className(), ['author_id' => 'id']);
+        return $this->hasMany(Responds::class, ['author_id' => 'id']);
     }
 
     /**
@@ -153,7 +143,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */ 
     public function getReviewsAmount()
     {
-        return $this->hasMany(Reviews::className(), ['user_id' => 'id'])->count() ?? 0;
+        return $this->hasMany(Reviews::class, ['user_id' => 'id'])->count() ?? 0;
     }
 
     /**
@@ -161,7 +151,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getReviews()
     {
-        return $this->hasMany(Reviews::className(), ['user_id' => 'id']);
+        return $this->hasMany(Reviews::class, ['user_id' => 'id']);
     }
 
     /**
@@ -169,7 +159,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getSpecialization()
     {
-        return $this->hasMany(Specialization::className(), ['user_id' => 'id']);
+        return $this->hasMany(Specialization::class, ['user_id' => 'id']);
     }
 
     /**
@@ -177,15 +167,27 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getTasks()
     {
-        return $this->hasMany(Tasks::className(), ['author_id' => 'id']);
+        return $this->hasMany(Tasks::class, ['author_id' => 'id']);
     }
 
     /**
+     * подсчет общего числа заданий в роли исполнителя
+     *
      * @return integer
      */
-    public function getOrders()
+    public function getOrdersAmount()
     {
-        return $this->hasMany(Tasks::className(), ['executor_id' => 'id'])->count() ?? 0;;
+        return $this->hasMany(Tasks::class, ['executor_id' => 'id'])->count() ?? 0;
+    }
+
+    /**
+     * подсчет общего числа проваленных заданий в роли исполнителя
+     * 
+     * @return integer
+     */
+    public function getFailuresAmount()
+    {
+        return $this->hasMany(Tasks::class, ['executor_id' => 'id', 'status' => 'fail'])->count() ?? 0;
     }
 
     /**
@@ -193,19 +195,17 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getCity()
     {
-        return $this->hasOne(Cities::className(), ['id' => 'city_id']);
+        return $this->hasOne(Cities::class, ['id' => 'city_id']);
     }
 
     /**
      * проверка, является ли пользователь исполнителем
      *
-     * @param int $id пользователя
-     *
      * @return boolean
      */
-    public static function isUserDoer($id)
+    public function isDoer(): bool
     {
-        return (new Query())->from('specialization')->where(['user_id' => $id])->exists();
+        return $this->getSpecialization()->exists();
     }
  
     /**
@@ -213,10 +213,10 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      *
      * @return array
      */
-    public function getProfessions()
+    public function getCategories()
     {
-        return (new Query())->select('title')->from('specialization s')->where(['user_id' => $this->id])
-        ->innerJoin('categories c', 's.category_id=c.id')->orderBy(['title' => SORT_ASC])->column();
+        return $this->hasMany(Categories::class, ['id' => 'category_id'])
+            ->viaTable('specialization', ['user_id' => 'id'])->all();
     }
 
     /**
@@ -226,6 +226,6 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getRating()
     {
-        return $this->hasMany(Reviews::className(), ['user_id' => 'id'])->average('value') ?? 0;
+        return $this->hasMany(Reviews::class, ['user_id' => 'id'])->average('value') ?? 0;
     }
 }

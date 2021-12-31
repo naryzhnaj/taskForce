@@ -3,31 +3,30 @@
 namespace frontend\models\forms;
 
 use yii\base\Model;
-use yii\db\Query;
 use frontend\models\Tasks;
 
 /**
  * This is the form class for task search.
  *
  * @var string $period
- * @var bool $without_responds
- * @var bool $is_distant
+ * @var bool $withoutResponds
+ * @var bool $isDistant
  * @var string $title
  * @var int[] $categories
  */
 class TaskSearchForm extends Model
 {
     public $period;
-    public $without_responds;
-    public $is_distant;
+    public $withoutResponds;
+    public $isDistant;
     public $categories;
     public $title;
 
     public function rules()
     {
         return [
-            [['without_responds', 'is_distant'], 'boolean'],
-            [['without_responds', 'is_distant'], 'default', 'value' => false],
+            [['withoutResponds', 'isDistant'], 'boolean'],
+            [['withoutResponds', 'isDistant'], 'default', 'value' => false],
 
             ['categories', 'default', 'value' => []],
             ['period', 'in', 'range' => ['all', 'day', 'week', 'month']],
@@ -39,8 +38,8 @@ class TaskSearchForm extends Model
     public function attributeLabels()
     {
         return [
-            'without_responds' => 'Без откликов',
-            'is_distant' => 'Удаленная работа',
+            'withoutResponds' => 'Без откликов',
+            'isDistant' => 'Удаленная работа',
         ];
     }
 
@@ -69,18 +68,18 @@ class TaskSearchForm extends Model
     {
         $query = Tasks::getMainList();
         $query->andFilterWhere(['like', 'title', $this->title]);
-        
-        if ($this->is_distant) {
+
+        if ($this->isDistant) {
             $query->andWhere('address IS NULL');
         }
         if (in_array($this->period, ['day', 'week', 'month'])) {
             $query->andWhere('dt_add >=' . $this->interval);
         }
-        if (($this->categories)) {
+        if ($this->categories) {
             $query->andWhere(['in', 'category_id', $this->categories]);
         }
-        if ($this->without_responds) {
-            $query->andWhere(['not in', 'id', (new Query())->select('task_id')->from('responds')->distinct()->column()]);
+        if ($this->withoutResponds) {
+            $query->joinWith('responds')->where('task_id IS NULL');
         }
         return $query;
     }

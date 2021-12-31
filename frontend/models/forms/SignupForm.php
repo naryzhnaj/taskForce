@@ -58,13 +58,13 @@ class SignupForm extends Model
             $user->name = $this->username;
             $user->email = $this->email;
             $user->city_id = $this->city;
-            $user->save(false);
-            Yii::$app->user->login($user);
-
+            $user->save();
+           
             $transaction->commit();
+            Yii::$app->user->login($user);
         } catch (\Exception $e) {
             $transaction->rollback();
-            throw new \yii\web\ServerErrorHttpException("Извините, при сохранении произошла ошибка");
+            throw new \yii\web\ServerErrorHttpException('Извините, при сохранении произошла ошибка');
         }
     }
 }

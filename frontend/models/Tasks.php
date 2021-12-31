@@ -1,8 +1,8 @@
 <?php
 
 namespace frontend\models;
+use frontend\models\Users;
 
-use yii\db\Query;
 /**
  * This is the model class for table "tasks".
  *
@@ -55,10 +55,10 @@ class Tasks extends \yii\db\ActiveRecord
             [['title', 'address'], 'string', 'max' => 128],
             [['description'], 'string', 'max' => 255],
             [['status'], 'string', 'max' => 11],
-            [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['author_id' => 'id']],
-            [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['executor_id' => 'id']],
-            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::className(), 'targetAttribute' => ['city_id' => 'id']],
-            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::className(), 'targetAttribute' => ['category_id' => 'id']],
+            [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['author_id' => 'id']],
+            [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['executor_id' => 'id']],
+            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::class, 'targetAttribute' => ['city_id' => 'id']],
+            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::class, 'targetAttribute' => ['category_id' => 'id']],
         ];
     }
 
@@ -92,7 +92,7 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getAttachments()
     {
-        return $this->hasMany(Attachment::className(), ['task_id' => 'id'])->select('filename')->orderBy(['filename' => SORT_ASC])->column();
+        return $this->hasMany(Attachment::class, ['task_id' => 'id'])->select('filename')->orderBy(['filename' => SORT_ASC])->column();
     }
 
     /**
@@ -100,7 +100,7 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getChats()
     {
-        return $this->hasMany(Chats::className(), ['task_id' => 'id']);
+        return $this->hasMany(Chats::class, ['task_id' => 'id']);
     }
 
     /**
@@ -108,18 +108,20 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getResponds()
     {
-        return $this->hasMany(Responds::className(), ['task_id' => 'id']);
+        return $this->hasMany(Responds::class, ['task_id' => 'id']);
     }
 
     /**
-     * проверка наличия отклика.
+     * проверка, что кандидат вправе оставить отклик.
+     * 
      * @param int $id id гостя
      *
      * @return bool
      */
-    public function checkCandidate($id)
+    public function checkCandidate(int $id): bool
     {
-        return $this->hasMany(Responds::className(), ['task_id' => 'id'])->where(['responds.author_id' => $id])->exists();
+        return (Users::findOne($id)->isDoer() &&
+            !$this->hasMany(Responds::class, ['task_id' => 'id'])->where(['responds.author_id' => $id])->exists());
     }
 
     /**
@@ -127,7 +129,7 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getReviews()
     {
-        return $this->hasMany(Reviews::className(), ['task_id' => 'id']);
+        return $this->hasMany(Reviews::class, ['task_id' => 'id']);
     }
 
     /**
@@ -135,7 +137,7 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getAuthor()
     {
-        return $this->hasOne(Users::className(), ['id' => 'author_id']);
+        return $this->hasOne(Users::class, ['id' => 'author_id']);
     }
 
     /**
@@ -143,7 +145,7 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getExecutor()
     {
-        return $this->hasOne(Users::className(), ['id' => 'executor_id']);
+        return $this->hasOne(Users::class, ['id' => 'executor_id']);
     }
 
     /**
@@ -151,7 +153,7 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getCity()
     {
-        return $this->hasOne(Cities::className(), ['id' => 'city_id']);
+        return $this->hasOne(Cities::class, ['id' => 'city_id']);
     }
 
     /**
@@ -159,7 +161,7 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public function getCategory()
     {
-        return $this->hasOne(Categories::className(), ['id' => 'category_id']);
+        return $this->hasOne(Categories::class, ['id' => 'category_id']);
     }
 
     /**
@@ -170,7 +172,6 @@ class Tasks extends \yii\db\ActiveRecord
     public static function getRecent(int $amount)
     {
         return self::find()
-            ->select('category_id, title, description, budget, dt_add')
             ->where(['status' => self::STATUS_NEW])->andWhere('end_date >= now() OR end_date IS NULL')
             ->orderBy(['dt_add' => SORT_DESC])->limit($amount)->all();
     }
@@ -182,22 +183,9 @@ class Tasks extends \yii\db\ActiveRecord
      */
     public static function getMainList()
     {
-        return self::find()
-            ->select('id, category_id, title, description, budget, address, dt_add')
-            ->where(['status' => self::STATUS_NEW])
+        return self::find()->where(['status' => self::STATUS_NEW])
             ->andWhere('end_date >= now() OR end_date IS NULL')
             ->indexBy('id');
-    }
-
-    /**
-     * выборка свободных исполнителей.
-     *
-     * @return \yii\db\Query
-     */
-    public static function getFreeDoers()
-    {
-        $busyQuery = (new Query())->select('executor_id')->from('tasks')->where(['status' => self::STATUS_PROGRESS])->column();
-        return (new Query())->select('id')->from('users')->where(['not in', 'id', $busyQuery]);
     }
 
     /**
@@ -205,7 +193,7 @@ class Tasks extends \yii\db\ActiveRecord
      *
      * @return boolean
      */
-    public function isUserCustomer()
+    private function isUserCustomer()
     {
         return $this->author_id === \Yii::$app->user->id;
     }

@@ -7,7 +7,7 @@ use frontend\widgets\RatingWidget;
     <div class="feedback-card__top">
         <div class="user__search-icon">
             <a href="#"><img src="/img/man-glasses.jpg" width="65" height="65"></a>
-            <span><?=$model->getOrders(); ?> заданий</span>
+            <span><?=$model->ordersAmount; ?> заданий</span>
             <span><?=$model->reviewsAmount; ?> отзывов</span>
         </div>
         <div class="feedback-card__top--name user__search-card">
@@ -20,8 +20,8 @@ use frontend\widgets\RatingWidget;
         <span class="new-task__time">Был на сайте 25 минут назад</span>
     </div>
     <div class="link-specialization user__search-link--bottom">
-        <?php foreach ($model->professions as $profession): ?>
-            <a href="#" class="link-regular"><?=$profession; ?></a>
+        <?php foreach ($model->getCategories() as $profession): ?>
+            <a href="#" class="link-regular"><?=$profession->title; ?></a>
         <?php endforeach; ?>
     </div>
 </div>

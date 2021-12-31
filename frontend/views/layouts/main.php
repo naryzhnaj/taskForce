@@ -7,7 +7,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use frontend\assets\AppAsset;
-use frontend\models\Users;
+use frontend\models\Cities;
 
 AppAsset::register($this);
 $this->beginPage(); ?>
@@ -88,7 +88,7 @@ $this->beginPage(); ?>
           <li class="site-list__item">
             <a href="#">Мой профиль</a>
           </li>
-          <?php if (!Users::isUserDoer(Yii::$app->user->id)):?>
+          <?php if (!Yii::$app->user->identity->isDoer()):?>
             <li class="site-list__item">
               <a href="<?=Url::toRoute('/tasks/create'); ?>">Создать задание</a>
             </li>

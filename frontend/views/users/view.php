@@ -19,7 +19,7 @@ $age = (new DateTime('now'))->diff(new DateTime($user->account->birth_date))->fo
                 <div class="profile-mini__name five-stars__rate">
                     <?=RatingWidget::widget(['rating' => $user->getRating()]); ?>
                 </div>
-                <b class="done-task">Выполнил <?=$user->getOrders(); ?> заказов</b><b class="done-review">Получил <?=$user->reviewsAmount; ?> отзывов</b>
+                <b class="done-task">Выполнил <?=$user->ordersAmount; ?> заказов</b><b class="done-review">Получил <?=$user->reviewsAmount; ?> отзывов</b>
             </div>
             <div class="content-view__headline user__card-bookmark user__card-bookmark--current">
                 <span>Был на сайте 25 минут назад</span>
@@ -32,8 +32,8 @@ $age = (new DateTime('now'))->diff(new DateTime($user->account->birth_date))->fo
             <div class="user__card-info">
                 <h3 class="content-view__h3">Специализации</h3>
                 <div class="link-specialization">
-                    <?php foreach ($user->professions as $profession): ?>
-                        <a href="#" class="link-regular"><?=$profession; ?></a>
+                    <?php foreach ($user->getCategories() as $profession): ?>
+                        <a href="#" class="link-regular"><?=$profession->title; ?></a>
                     <?php endforeach; ?>
                 </div>
                 <h3 class="content-view__h3">Контакты</h3>

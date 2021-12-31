@@ -3,6 +3,8 @@
 namespace frontend\models;
 
 use yii\web\ServerErrorHttpException;
+use yii\web\ForbiddenHttpException;
+use frontend\models\forms\RespondForm;
 
 /**
  * бизнес-логика для сущности Задание.
@@ -61,42 +63,50 @@ class TaskActions
     public function getActionList(): string
     {
         $role = $this->getRole();
-        switch ($this->model->status) {
-            case self::STATUS_PROGRESS:
-                if ($role === self::EXECUTOR) {
-                    return self::ACTION_REFUSE;
-                }
-                if ($role === self::CUSTOMER) {
-                    return self::ACTION_COMPLETE;
-                }
-            break;
-            case self::STATUS_NEW:
-                // откликаться может только исполнитель и только один раз
-                if ($role === self::VISITOR && Users::isUserDoer($this->user_id)
-                    && !$this->model->checkCandidate($this->user_id)) {
-                    return self::ACTION_RESPOND;
-                }
-                if ($role === self::CUSTOMER) {
-                    return self::ACTION_CANCEL;
-                }
+        if (!$this->isUserAllowedToRespond() || !in_array($this->model->status, [self::STATUS_NEW, self::STATUS_PROGRESS])) {
+            return '';
         }
-
-        return '';
+        if ($this->model->status === self::STATUS_PROGRESS) {
+            return ($role === self::EXECUTOR) ? self::ACTION_REFUSE : self::ACTION_COMPLETE;
+        }
+        return ($role === self::CUSTOMER) ? self::ACTION_CANCEL : self::ACTION_RESPOND;
+    }
+    
+    /**
+     * проверка права оставлять отклик на задание
+     *
+     * @return bool
+     */
+    private function isUserAllowedToRespond(): bool
+    {
+        return ($this->model->status === self::STATUS_NEW && 
+            $this->getRole() === self::VISITOR &&
+            $this->model->checkCandidate($this->user_id));
     }
 
     /**
-     * одобрить отклик.
+     * проверка права просматривать стр.описания задания
+     *
+     * @return bool
+     */
+    public function isUserAllowedToView(): bool
+    {
+        return ($this->model->status === self::STATUS_NEW || in_array($this->getRole(), [self::CUSTOMER, self::EXECUTOR]));
+    }
+
+    /**
+     * заказчик одобряет отклик.
      *
      * @param Responds $respond
      *
      * @throws ServerErrorHttpException
      *
-     * @return mixed
+     * @return void
      */
-    public function admitRespond(Responds $respond)
+    public function admitRespond(Responds $respond): void
     {
         if ($this->getRole() !== self::CUSTOMER || $this->model->status !== self::STATUS_NEW) {
-            return false;
+            throw new ForbiddenHttpException('Извините, действие недоступно');
         }
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -114,16 +124,16 @@ class TaskActions
     }
 
     /**
-     * отклонить отклик.
+     * заказчик отклоняет отклик.
      *
      * @param Responds $respond
      *
-     * @return mixed
+     * @return void
      */
-    public function refuseRespond(Responds $respond)
+    public function refuseRespond(Responds $respond): void
     {
         if ($this->getRole() !== self::CUSTOMER || $respond->status !== self::STATUS_NEW) {
-            return false;
+            throw new ForbiddenHttpException('Извините, действие недоступно');
         }
         $respond->updateAttributes(['status' => self::STATUS_CANCEL]);
     }
@@ -131,12 +141,12 @@ class TaskActions
     /**
      *  исполнитель отказывается.
      *
-     *  @return mixed
+     *  @return void
      */
-    public function refuse()
+    public function refuse(): void
     {
         if ($this->getRole() !== self::EXECUTOR || $this->model->status !== self::STATUS_PROGRESS) {
-            return false;
+            throw new ForbiddenHttpException('Извините, действие недоступно');
         }
         $this->fail();
     }
@@ -146,12 +156,10 @@ class TaskActions
      *
      * @throws ServerErrorHttpException
      */
-    private function fail()
+    private function fail(): void
     {
         $this->model->status = self::STATUS_FAIL;
-        ++$this->model->executor->failures;
-
-        if (!$this->model->executor->save() || !$this->model->save()) {
+        if (!$this->model->save()) {
             throw new ServerErrorHttpException('при сохранении произошла ошибка');
         }
     }
@@ -159,12 +167,12 @@ class TaskActions
     /**
      * заказчик удаляет задание.
      *
-     * @return mixed
+     * @return void
      */
-    public function cancelTask()
+    public function cancelTask(): void
     {
         if ($this->getRole() !== self::CUSTOMER || $this->model->status !== self::STATUS_NEW) {
-            return false;
+            throw new ForbiddenHttpException('Извините, действие недоступно');
         }
         $this->model->updateAttributes(['status' => self::STATUS_CANCEL]);
     }
@@ -172,16 +180,16 @@ class TaskActions
     /**
      * заказчик завершает задание.
      *
-     * @param array $data данные отзыва
+     * @param RespondForm $data данные отзыва
      *
      * @throws ServerErrorHttpException
      *
-     * @return mixed
+     * @return void
      */
-    public function complete($data)
+    public function complete(RespondForm $data): void
     {
         if ($this->getRole() !== self::CUSTOMER || $this->model->status !== self::STATUS_PROGRESS) {
-            return false;
+            throw new ForbiddenHttpException('Извините, действие недоступно');
         }
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -209,14 +217,12 @@ class TaskActions
     /**
      * гость откликается.
      *
-     * @param $data данные отклика
-     *
-     * @return mixed
+     * @param RespondForm $data данные отклика
      */
-    public function respond($data)
+    public function respond(RespondForm $data): void
     {
-        if ($this->getRole() !== self::VISITOR || $this->model->status !== self::STATUS_NEW || $this->model->checkCandidate($this->user_id)) {
-            return false;
+        if (!$this->isUserAllowedToRespond()) {
+            throw new ForbiddenHttpException('Извините, действие недоступно'); 
         }
         $respond = new Responds();
         $respond->task_id = $this->model->id;

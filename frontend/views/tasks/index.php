@@ -37,9 +37,9 @@ $this->title = 'Новые задания';
     <div class="search-task__wrapper">
         <?php $form = ActiveForm::begin([
             'id' => 'search-task',
+            'method' => 'get',
             'options' => [
                 'tag' => false,
-                'method' => 'get',
                 'class' => 'search-task__form',
             ]
         ]); ?>
@@ -50,9 +50,9 @@ $this->title = 'Новые задания';
         <fieldset class="search-task__categories">
             <legend>Дополнительно</legend>
             <?php
-            echo $form->field($model, 'without_responds', ['labelOptions' => ['class' => "checkbox__legend"]])
+            echo $form->field($model, 'withoutResponds', ['labelOptions' => ['class' => "checkbox__legend"]])
             ->checkbox(['class' => "checkbox__input"]);
-            echo $form->field($model, 'is_distant', ['labelOptions' => ['class' => "checkbox__legend"]])
+            echo $form->field($model, 'isDistant', ['labelOptions' => ['class' => "checkbox__legend"]])
             ->checkbox(['class' => "checkbox__input"]);
             ?>
         </fieldset>

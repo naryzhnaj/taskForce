@@ -4,7 +4,6 @@ namespace frontend\controllers;
 
 use Yii;
 use frontend\models\Tasks;
-use frontend\models\Users;
 use frontend\models\Categories;
 use frontend\models\Responds;
 use frontend\models\forms\TaskSearchForm;
@@ -27,7 +26,7 @@ class TasksController extends \frontend\controllers\SecuredController
             'allow' => false,
             'actions' => ['create'],
             'matchCallback' => function ($rule, $action) {
-                return Users::isUserDoer(Yii::$app->user->id);
+                return Yii::$app->user->identity->isDoer();
             },
             'denyCallback' => function ($rule, $action) {
                 throw new ForbiddenHttpException('Извините, только заказчики могут создавать задачи');
@@ -52,7 +51,7 @@ class TasksController extends \frontend\controllers\SecuredController
             throw new NotFoundHttpException('не найдено ни одной категории');
         }
         $form = new TaskSearchForm();
-        $form->load(Yii::$app->request->post());
+        $form->load(Yii::$app->request->get());
 
         return $this->render('index', [
             'dataProvider' => new ActiveDataProvider([
@@ -81,17 +80,14 @@ class TasksController extends \frontend\controllers\SecuredController
         $task = Tasks::findOne($id);
         if (!$task) {
             throw new NotFoundHttpException('задание не найдено');
-        } elseif (!($task->status === Tasks::STATUS_NEW ||
-            $task->isUserCustomer() ||
-            $task->executor_id === Yii::$app->user->id)) {
-            // гости могут видеть только свободные задачи
+        }
+        $taskModel = (new TaskActions($task, Yii::$app->user->id));
+        // гости могут видеть только свободные задачи
+        if (!$taskModel->isUserAllowedToView()) {         
             throw new NotFoundHttpException('поиск исполнителей завершен');
         }
-        
-        // Доступное гостю действие
-        $action = (new TaskActions($task, Yii::$app->user->id))->getActionList();
 
-        return $this->render('view', ['task' => $task, 'action' => $action]);
+        return $this->render('view', ['task' => $task, 'action' => $taskModel->getActionList()]);
     }
 
     /**
@@ -104,14 +100,15 @@ class TasksController extends \frontend\controllers\SecuredController
         $form = new TaskCreateForm();
         
         if (Yii::$app->request->getIsPost() && $form->load(Yii::$app->request->post()) && $form->validate()) {
-            return $this->redirect(['view', 'id' => $form->createTask()]);   
+            $task = $form->createTask();
+            return $this->redirect(['view', 'id' => $task->id]);   
         }
 
         return $this->render('create', ['categories' => Categories::getList(), 'model' => $form]);
     }
 
     /**
-     * одобрить отклик.
+     * заказчик одобряет отклик.
      *
      * @param int $id id отклика
      *
@@ -132,7 +129,7 @@ class TasksController extends \frontend\controllers\SecuredController
     }
 
     /**
-     * отклонить отклик.
+     * заказчик отклоняет отклик.
      *
      * @param int $id id отклика
      *
@@ -189,7 +186,7 @@ class TasksController extends \frontend\controllers\SecuredController
     }
 
     /**
-     *  заказчик удаляет задание.
+     * заказчик удаляет задание.
      *
      * @param int $id id задания
      *
@@ -204,7 +201,7 @@ class TasksController extends \frontend\controllers\SecuredController
     }
 
     /**
-     *  исполнитель отказывается.
+     * исполнитель отказывается.
      *
      * @param int $id id задания
      *

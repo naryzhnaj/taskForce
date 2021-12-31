@@ -72,11 +72,11 @@ class TaskCreateForm extends Model
             foreach ($this->files as $file) {
                 $filename = sprintf('%s_%s.%s', $task, $file->baseName, $file->extension);
 
-                $new_file = new Attachment();
-                $new_file->task_id = $task;
-                $new_file->filename = $filename;
+                $attachment = new Attachment();
+                $attachment->task_id = $task;
+                $attachment->filename = $filename;
 
-                if (!$new_file->save() || !$file->saveAs(sprintf('%s/%s', Yii::getAlias('@uploads'), $filename))) {
+                if (!$attachment->save() || !$file->saveAs(sprintf('%s/%s', Yii::getAlias('@uploads'), $filename))) {
                     throw new \Exception("Не удалось сохранить $filename в базу");
                 }
             }
@@ -87,9 +87,9 @@ class TaskCreateForm extends Model
      * сохранение новой задачи
      *
      * @throws ServerErrorHttpException
-     * @return int $task->id
+     * @return Tasks $task
      */
-    public function createTask(): int
+    public function createTask(): Tasks
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -104,10 +104,10 @@ class TaskCreateForm extends Model
             $this->upload($task->id);
 
             $transaction->commit();
-            return $task->id;
+            return $task;
         } catch (\Exception $e) {
             $transaction->rollback();
-            throw new \yii\web\ServerErrorHttpException("Извините, при сохранении произошла ошибка");
+            throw new \yii\web\ServerErrorHttpException('Извините, при сохранении произошла ошибка');
         }
     }
 }
